@@ -52,7 +52,7 @@ public class LoginPage extends JFrame {
 
         // Adding the title image of the page to the frame
         try {
-            JLabel image = new JLabel(new ImageIcon(ImageIO.read(new File("C:\\Users\\Administrator\\IdeaProjects\\ThinkWave\\img\\thinkwave.png"))));
+            JLabel image = new JLabel(new ImageIcon(ImageIO.read(new File("img/Login/thinkwave.png"))));
             image.setBounds(5, 10, 1400, 100);
             contentPane.add(image);
         } catch (IOException e) {
@@ -60,7 +60,7 @@ public class LoginPage extends JFrame {
         }
 
         try {
-            JLabel image = new JLabel(new ImageIcon(ImageIO.read(new File("C:\\Users\\Administrator\\IdeaProjects\\ThinkWave\\img\\slogan.png"))));
+            JLabel image = new JLabel(new ImageIcon(ImageIO.read(new File("img/Login/slogan.png"))));
             image.setBounds(200, 125, 1000, 50);
             contentPane.add(image);
         } catch (IOException e) {
@@ -68,7 +68,7 @@ public class LoginPage extends JFrame {
         }
 
         try {
-            JLabel image = new JLabel(new ImageIcon(ImageIO.read(new File("C:\\Users\\Administrator\\IdeaProjects\\ThinkWave\\img\\login.png"))));
+            JLabel image = new JLabel(new ImageIcon(ImageIO.read(new File("img/Login/login.png"))));
             image.setBounds(580, 190, 200, 50);
             contentPane.add(image);
         } catch (IOException e) {
@@ -237,8 +237,19 @@ public class LoginPage extends JFrame {
         btnHelpQuery.setBackground(new Color(0,191,255));
         btnHelpQuery.addActionListener(e ->
         {
-            /*HelpQuery ob = new HelpQuery();
-            ob.main(null);*/
+            // Do you want to be redirected to the raise query page?
+            int a = JOptionPane.showConfirmDialog(btnHelpQuery, "Do you want to be redirected to the raise query page?");
+            if (a == JOptionPane.YES_OPTION) {
+                dispose();
+                EventQueue.invokeLater(() -> {
+                    try {
+                        HelpForm frame = new HelpForm();
+                        frame.setVisible(true);
+                    } catch (Exception exp1) {
+                        exp1.printStackTrace();
+                    }
+                });
+            }
         });
         contentPane.add(btnHelpQuery);
 
