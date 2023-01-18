@@ -271,7 +271,11 @@ public class HelpForm extends JFrame {
             int a = JOptionPane.showConfirmDialog(null, "Do you want to return to the login page?", "Select", JOptionPane.YES_NO_OPTION);
             if (a == 0) {
                 //If yes, return to the login page
-                new LoginPage().setVisible(true);
+                try {
+                    new LoginPage().setVisible(true);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
                 dispose();
             }
         });

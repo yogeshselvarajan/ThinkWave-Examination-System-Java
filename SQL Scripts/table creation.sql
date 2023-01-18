@@ -17,19 +17,17 @@ create table C##THINKWAVE.USER_TABLE
     PASSW_SALT     VARCHAR2(30)  not null
 );
 
-create index C##THINKWAVE.USER_TABLE_IDX_USER_ID_USER_PASSWORD
-    on C##THINKWAVE.USER_TABLE (ID, PASSW);
-
 create table C##THINKWAVE.INSTITUTION_TABLE
 (
     INSTITUTION_ADMIN_ID             VARCHAR2(5)   not null
         primary key,
     INSTITUTION_EMAIL_ADDRESS        VARCHAR2(319) not null
         unique,
-    INSTITUTION_PASSWORD             VARCHAR2(100) not null,
+    PASSW_HASH_INST                  VARCHAR2(100) not null,
     INSTITUTION_ADMIN_CREATED_ON     DATE          not null,
     INSTITUTION_ADMIN_EMAIL_VERIFIED CHAR          not null,
-    INSTID                           VARCHAR2(5)   not null
+    INSTID                           VARCHAR2(5)   not null,
+    PASSW_SALT_INST                  VARCHAR2(30)  not null
 );
 
 create table C##THINKWAVE.INSTRUCTOR_TABLE
@@ -121,5 +119,4 @@ create table C##THINKWAVE.USER_EXAM_ENROLL_TABLE
             references C##THINKWAVE.EXAM_TABLE,
     ENROLL_STATUS       CHAR        not null
 );
-
 
