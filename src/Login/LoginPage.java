@@ -271,8 +271,8 @@ public class LoginPage extends JFrame {
         btnForgetPassword.addActionListener(e ->
         {
             dispose();
-            /*ForgetPassword ob = new ForgetPassword();
-            ob.main(null);*/
+            ResetPassword resetPassword = new ResetPassword();
+            resetPassword.setVisible(true);
         });
         contentPane.add(btnForgetPassword);
 

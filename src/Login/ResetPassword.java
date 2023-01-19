@@ -15,10 +15,12 @@ import java.io.File;
 import java.io.IOException;
 
 import static FetchFromDatabase.CheckEmailExists.checkEmailExists;
+import static FetchFromDatabase.RetrieveUserID.retrieveUserID;
 
 public class ResetPassword extends JFrame
 {
     String verificationCode = null;
+    String userID = null;
     /**
      * Launch the application.
      */
@@ -171,6 +173,7 @@ public class ResetPassword extends JFrame
             }
             else
             {
+                userID = retrieveUserID(emailField.getText());
                 verificationCode = generateVerificationCode();
 
                 // Sending the verification code to the email address
@@ -195,8 +198,12 @@ public class ResetPassword extends JFrame
                     if (code.equals(verificationCode)) {
                         // Going to the reset password page
                         // Show verification success dialog box
-                        JOptionPane.showMessageDialog(btnsendCode, "Verification successful. Please enter your new password.");
+                        JOptionPane.showMessageDialog(btnsendCode, "Verification successful. Please enter your new password on the next page.");
                         dispose();
+                        // Run the NewPasswordPage class
+                        NewPassChange obj2 = new NewPassChange(emailField.getText());
+                        obj2.setVisible(true);
+
                     } else {
                         // Show verification failed dialog box
                         JOptionPane.showMessageDialog(btnsendCode, "Verification failed. Please try again.");
@@ -214,7 +221,20 @@ public class ResetPassword extends JFrame
         btnBackToLogin.setForeground(Color.BLUE);
         btnBackToLogin.setFont(new Font("Tahoma", Font.PLAIN, 15));
         btnBackToLogin.setBounds(700, 540, 250, 30);
-        btnBackToLogin.addActionListener(e -> {});
+        btnBackToLogin.addActionListener(e -> {
+            int dialogResult = JOptionPane.showConfirmDialog (btnBackToLogin, "Are you sure you want to head to the login page?","Warning",JOptionPane.YES_NO_OPTION);
+            if(dialogResult == JOptionPane.YES_OPTION) {
+                // Going to the login page
+                dispose();
+                LoginPage obj1;
+                try {
+                    obj1 = new LoginPage();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+                obj1.setVisible(true);
+            }
+        });
         frame.add(btnBackToLogin);
 
         // Button that exits the application
@@ -230,6 +250,6 @@ public class ResetPassword extends JFrame
             }
         });
         frame.add(btnExit);
-}
+    }
 }
 
