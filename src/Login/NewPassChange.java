@@ -1,6 +1,6 @@
 package Login;
 
-import FetchFromDatabase.UpdatePassword;
+import DatabaseFunctions.UpdatePassword;
 import Mail.MailSender;
 
 import javax.imageio.ImageIO;
@@ -11,7 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
-import static FetchFromDatabase.RetrieveUserID.retrieveUserID;
+import static DatabaseFunctions.RetrieveUserID.retrieveUserID;
 
 public class NewPassChange extends JFrame {
     private final JPasswordField passwordField;
@@ -81,9 +81,8 @@ public class NewPassChange extends JFrame {
                 confirmPasswordField.setText("");
                 passwordField.requestFocus();
             } else {
-                // Check if the password field is empty
-                passwordField.getPassword();
-                confirmPasswordField.getPassword();
+                // Check if  the password and confirm password fields are same
+
                 UpdatePassword.updatePassword((retrieveUserID(email)), Arrays.toString(passwordField.getPassword()));
                 JOptionPane.showMessageDialog(changeButton, "Password changed successfully and you will be redirected to login page.", "Success", JOptionPane.INFORMATION_MESSAGE);
 

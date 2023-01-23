@@ -1,4 +1,4 @@
-package FetchFromDatabase;
+package DatabaseFunctions;
 
 
 import java.sql.*;

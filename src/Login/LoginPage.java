@@ -1,19 +1,29 @@
 package Login;
 
 import Captcha.ImageGenerator;
-import FetchFromDatabase.AdminLoginCheck;
-import FetchFromDatabase.UserLoginCheck;
+import DatabaseFunctions.AdminLoginCheck;
+import DatabaseFunctions.RetrieveEmailID;
+import DatabaseFunctions.UpdateLoginActivity;
+import DatabaseFunctions.UserLoginCheck;
+import Mail.LoginNotifier;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serial;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.TimeZone;
+
 
 public class LoginPage extends JFrame {
     @Serial
@@ -26,6 +36,7 @@ public class LoginPage extends JFrame {
 
     /**
      * Launch the application.
+     *
      */
     public static void main(String[] args)
     {
@@ -163,8 +174,25 @@ public class LoginPage extends JFrame {
                     e.consume();
             }
         });
-
         contentPane.add(enterCaptcha);
+
+
+        Calendar now = Calendar.getInstance();
+        final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("IST"));
+            JLabel time = new JLabel(dateFormat.format(now.getTime()));
+        time.setFont(new Font("Segoe Print", Font.BOLD, 18));
+        time.setForeground(new Color(178,34,34));
+        time.setBounds(975, 130, 300, 200);
+        contentPane.add(time);
+        new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Get the IST time zone and set it to the label to display the time
+                Calendar now = Calendar.getInstance();
+                time.setText(dateFormat.format(now.getTime()));
+            }
+        }).start();
 
         /* Button to log in as a user (both institution & user level) */
         btnUserLogin = new JButton("Login");
@@ -178,9 +206,17 @@ public class LoginPage extends JFrame {
             String userID = String.valueOf(userIDField.getText());
             String password = String.valueOf(passwordField.getPassword());
             captchaEnteredByUser = enterCaptcha.getText();
-            if(UserLoginCheck.checkUserLogin(userID, institutionID, password,captchaFromImage,captchaEnteredByUser))
-            {
-                JOptionPane.showMessageDialog(btnUserLogin, "You have successfully logged in");
+
+            String email = RetrieveEmailID.retrieveEmail(userID);
+
+            if(UserLoginCheck.checkUserLogin(userID, institutionID, password,captchaFromImage,captchaEnteredByUser)) {
+                JOptionPane.showMessageDialog(btnUserLogin, "You have successfully logged in ", "Login Successful", JOptionPane.INFORMATION_MESSAGE);
+                try {
+                    LoginNotifier.sendLoginNotification(email, userID);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+                UpdateLoginActivity.updateLoginActivity(userID);
                 dispose();
             }
             else if (institutionID.equals("") || userID.equals("") || password.equals("") || captchaEnteredByUser.equals(""))

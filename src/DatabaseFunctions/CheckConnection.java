@@ -1,4 +1,4 @@
-package FetchFromDatabase;
+package DatabaseFunctions;
 
 import org.jetbrains.annotations.Nullable;
 import java.sql.*;

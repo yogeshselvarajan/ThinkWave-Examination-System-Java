@@ -1,25 +1,23 @@
-package FetchFromDatabase;
+package DatabaseFunctions;
 
 import java.sql.*;
 
-public class RetriveUserName
-{
-    public String getUserName(String userID) {
-        String userName = null;
+public class RetrieveUserID {
+    public static String retrieveUserID(String email) {
+        String userID = null;
         try {
             Connection connection = (Connection) DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:orcl",
-                    "system", "orcl");
+                    "c##thinkwave", "orcl");
             PreparedStatement st = (PreparedStatement) connection
-                    .prepareStatement("Select ID, NAME from C##THINKWAVE.USER_TABLE where ID=? ");
-            st.setString(1, userID);
-
+                    .prepareStatement("Select ID from C##THINKWAVE.USER_TABLE where EMAIL=?");
+            st.setString(1, email);
             ResultSet rs = st.executeQuery();
             if (rs.next()) {
-                userName = rs.getString(2);
+                userID = rs.getString("ID");
             }
         } catch (SQLException sqlException) {
             sqlException.printStackTrace();
         }
-        return userName;
+        return userID;
     }
 }
