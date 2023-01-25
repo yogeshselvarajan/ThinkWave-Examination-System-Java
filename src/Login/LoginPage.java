@@ -9,12 +9,11 @@ import Mail.LoginNotifier;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -31,15 +30,13 @@ public class LoginPage extends JFrame {
     private static JTextField institutionIDField, userIDField;
     private static JPasswordField passwordField;
     JButton btnUserLogin;
-    public static String captchaFromImage , captchaEnteredByUser;
+    public static String captchaFromImage, captchaEnteredByUser;
     static JPanel contentPane;
 
     /**
      * Launch the application.
-     *
      */
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
             try {
                 LoginPage frame = new LoginPage();
@@ -55,20 +52,11 @@ public class LoginPage extends JFrame {
         try {
             // Generating the captcha image
             captchaFromImage = ImageGenerator.Generate();
-            addCaptchaImage();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // Function that adds the captcha image to the frame dynamically, can be generated again if user enters wrong captcha
-    public static void addCaptchaImage() throws IOException {
-        // Adding the captcha image to the frame
-        BufferedImage image = ImageIO.read(new File("./img/Login/CaptchaText.png"));
-        JLabel loadedImage = new JLabel(new ImageIcon(image));
-        loadedImage.setBounds(550, 470, 200, 50);
-        contentPane.add(loadedImage);
-    }
 
     /**
      * Create the frame.
@@ -79,12 +67,11 @@ public class LoginPage extends JFrame {
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         setContentPane(contentPane);
         contentPane.setLayout(null);
-        contentPane.setBackground((new Color(26, 238, 118)));
+        contentPane.setBackground(Color.LIGHT_GRAY);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setUndecorated(true);
         setAlwaysOnTop(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
 
         // Adding the title image of the page to the frame
         try {
@@ -111,43 +98,208 @@ public class LoginPage extends JFrame {
             e.printStackTrace();
         }
 
+        try {
+            JLabel image = new JLabel(new ImageIcon(ImageIO.read(new File("./img/Login/Login UI Image.png"))));
+            image.setBounds(15, 200, 600, 500);
+            contentPane.add(image);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // A panel at the top of the frame
+        JPanel paneltop = new JPanel();
+        paneltop.setBounds(0, 0, 1400, 195);
+        // Set colour to panel background to #ff9478 (light orange)
+        paneltop.setBackground(new Color(255, 148, 120));
+        paneltop.setLayout(null);
+        contentPane.add(paneltop);
+
+        // A panel with different colour below the paneltop panel to separate the two panels
+        JPanel paneltop2 = new JPanel();
+        paneltop2.setBounds(0, 195, 1400, 50);
+        // Set colour to panel background to #ff9478 (light orange)
+        paneltop2.setBackground(new Color(255, 148, 120));
+        paneltop2.setLayout(null);
+        contentPane.add(paneltop2);
+
+        // A label with the "Home" text to go back to the home page
+        JLabel lblHome = new JLabel("   Home");
+        lblHome.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int a = JOptionPane.showConfirmDialog(institutionIDField, "Do you want to go to Home Page?", "Select", JOptionPane.YES_NO_OPTION);
+                if (a == JOptionPane.YES_OPTION) {
+                    dispose();
+                    EventQueue.invokeLater(() -> {
+                    });
+                }
+            }
+        });
+        lblHome.setForeground(Color.BLACK);
+        lblHome.setFont(new Font("Tahoma", Font.PLAIN, 20));
+        lblHome.setBounds(1050, 10, 100, 30);
+        lblHome.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        lblHome.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        paneltop2.add(lblHome);
+
+        // A label with the "Any Queries" text to go to the contact us page
+        JLabel lblAnyQueries = new JLabel(" Contact Us");
+        lblAnyQueries.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int a = JOptionPane.showConfirmDialog(institutionIDField, "Do you want to be redirected to the raise query page?", "Select", JOptionPane.YES_NO_OPTION);
+                if (a == JOptionPane.YES_OPTION) {
+                    dispose();
+                    EventQueue.invokeLater(() -> {
+                        try {
+                            HelpForm frame = new HelpForm();
+                            frame.setVisible(true);
+                        } catch (Exception exp1) {
+                            exp1.printStackTrace();
+                        }
+                    });
+                }
+            }
+        });
+        lblAnyQueries.setForeground(Color.BLACK);
+        lblAnyQueries.setFont(new Font("Tahoma", Font.PLAIN, 20));
+        lblAnyQueries.setBounds(1170, 10, 125, 30);
+        lblAnyQueries.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        lblAnyQueries.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        paneltop2.add(lblAnyQueries);
+
+        // A panel side to the Login Image UI image to hold all the text fields and buttons
+        JPanel loginpanel = new JPanel();
+        loginpanel.setBounds(650, 248, 712, 480);
+        loginpanel.setBackground(Color.LIGHT_GRAY);
+        // Set red border to the panel
+        loginpanel.setBorder(new LineBorder(new Color(255, 0, 0), 3));
+        // Set background colour to the panel to #FCCF31
+        loginpanel.setBackground(new Color(252, 207, 49));
+        contentPane.add(loginpanel);
+        loginpanel.setLayout(null);
+        contentPane.add(loginpanel);
+
+        // Label with the text: Log in with your data that you have entered during your registration.
+        JLabel lblLoginWithYour = new JLabel("Log in with your data that you have entered during your registration.");
+        lblLoginWithYour.setForeground(Color.BLACK);
+        lblLoginWithYour.setFont(new Font("Times New Roman", Font.ROMAN_BASELINE, 24));
+        lblLoginWithYour.setBounds(40, 05, 700, 52);
+        lblLoginWithYour.setForeground(Color.BLACK);
+        loginpanel.add(lblLoginWithYour);
+
+
         JLabel lblInstituteID = new JLabel("Institution ID :");
         lblInstituteID.setBackground(Color.BLACK);
         lblInstituteID.setForeground(Color.BLACK);
-        lblInstituteID.setFont(new Font("Tahoma", Font.PLAIN, 25));
-        lblInstituteID.setBounds(470, 260, 193, 52);
-        lblInstituteID.setForeground(new Color(178,34,34));
-        contentPane.add(lblInstituteID);
+        lblInstituteID.setFont(new Font("Times New Roman", Font.ROMAN_BASELINE, 28));
+        lblInstituteID.setBounds(150, 50, 200, 52);
+        lblInstituteID.setForeground(new Color(178, 34, 34));
+        loginpanel.add(lblInstituteID);
         institutionIDField = new JTextField();
-        institutionIDField.setFont(new Font("Segoe Print", Font.BOLD, 20));
-        institutionIDField.setBounds(670, 263, 80, 35);
-        institutionIDField.setColumns(5);
-        contentPane.add(institutionIDField);
+        institutionIDField.setFont(new Font("Segoe Print", Font.PLAIN, 22));
+        institutionIDField.setBounds(325, 60, 85, 30);
+        institutionIDField.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        // Action Listener to allow at most 5 characters to be entered in the text field
+        institutionIDField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (institutionIDField.getText().length() >= 5) // limit textfield to 5 characters
+                    e.consume();
+            }
+        });
+        loginpanel.add(institutionIDField);
 
         JLabel lblUserID = new JLabel("User ID :");
         lblUserID.setForeground(Color.BLACK);
         lblUserID.setBackground(Color.CYAN);
-        lblUserID.setFont(new Font("Tahoma", Font.PLAIN, 25));
-        lblUserID.setBounds(470, 330, 193, 52);
-        lblUserID.setForeground(new Color(178,34,34));
-        contentPane.add(lblUserID);
+        lblUserID.setFont(new Font("Times New Roman", Font.ROMAN_BASELINE, 28));
+        lblUserID.setBounds(150, 125, 193, 52);
+        lblUserID.setForeground(new Color(178, 34, 34));
+        loginpanel.add(lblUserID);
         userIDField = new JTextField();
-        userIDField.setFont(new Font("Sogoe Print", Font.BOLD, 20));
-        userIDField.setBounds(670, 333, 80, 35);
-        userIDField.setColumns(5);
-        contentPane.add(userIDField);
+        userIDField.setFont(new Font("Sogoe Print", Font.PLAIN, 22));
+        userIDField.setBounds(325, 125, 80, 35);
+        // Action Listener to allow at most 5 characters to be entered in the text field
+        userIDField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (userIDField.getText().length() >= 5) // limit textfield to 5 characters
+                    e.consume();
+            }
+        });
+        userIDField.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        loginpanel.add(userIDField);
 
         JLabel lblPassword = new JLabel("Password :");
         lblPassword.setForeground(Color.BLACK);
         lblPassword.setBackground(Color.CYAN);
-        lblPassword.setFont(new Font("Tahoma", Font.PLAIN, 25));
-        lblPassword.setBounds(470, 400, 193, 52);
-        lblPassword.setForeground(new Color(178,34,34));
-        contentPane.add(lblPassword);
+        lblPassword.setFont(new Font("Times New Roman", Font.ROMAN_BASELINE, 28));
+        lblPassword.setBounds(150, 200, 193, 52);
+        lblPassword.setForeground(new Color(178, 34, 34));
+        loginpanel.add(lblPassword);
         passwordField = new JPasswordField();
-        passwordField.setFont(new Font("Sogoe Print", Font.BOLD, 20));
-        passwordField.setBounds(670, 400, 160, 35);
-        contentPane.add(passwordField);
+        passwordField.setFont(new Font("Times New Roman", Font.PLAIN, 20));
+        passwordField.setBounds(325, 205, 160, 35);
+        passwordField.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        passwordField.setEchoChar('*');
+        loginpanel.add(passwordField);
+
+        // A image icon to show the password if clicked
+        ImageIcon showPasswordIcon = new ImageIcon("./img/Login/show.png");
+        JLabel showPassword = new JLabel(showPasswordIcon);
+        showPassword.setBounds(485, 205, 35, 35);
+        showPassword.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (passwordField.getEchoChar() == '*') {
+                    passwordField.setEchoChar((char) 0);
+                } else {
+                    passwordField.setEchoChar('*');
+                }
+            }
+        });
+        // Add border around the image icon
+        showPassword.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        loginpanel.add(showPassword);
+
+        JLabel lblForgetPassword = new JLabel("Forgot Password? Click here");
+        lblForgetPassword.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        lblForgetPassword.setFont(new Font("Times New Roman", Font.ROMAN_BASELINE, 20));
+        lblForgetPassword.setForeground(new Color(0, 0, 0));
+        lblForgetPassword.setBounds(370, 240, 240, 40);
+        // When mouse is hovered over the label, the label changes colour to blue and underlines the text and
+        // when the mouse is not hovered over the label, the label changes colour to black and removes the underline
+        lblForgetPassword.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                lblForgetPassword.setForeground(new Color(0, 0, 255));
+                lblForgetPassword.setText("<html><u>Forgot Password? Click here</u></html>");
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                lblForgetPassword.setForeground(new Color(0, 0, 0));
+                lblForgetPassword.setText("Forgot Password? Click here");
+            }
+        });
+        lblForgetPassword.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                int a = JOptionPane.showConfirmDialog(institutionIDField, "Do you want to reset your password?", "Reset Password", JOptionPane.YES_NO_OPTION);
+                if (a == JOptionPane.YES_OPTION) {
+                    dispose();
+                    EventQueue.invokeLater(() -> {
+                        try {
+                            ResetPassword frame = new ResetPassword();
+                            frame.setVisible(true);
+                        } catch (Exception exp1) {
+                            exp1.printStackTrace();
+                        }
+                    });
+                }
+            }
+        });
+        loginpanel.add(lblForgetPassword);
+
 
         try {
             generateCaptcha();
@@ -155,17 +307,26 @@ public class LoginPage extends JFrame {
             throw new RuntimeException(ex);
         }
 
-        JLabel lblCaptcha = new JLabel("Enter captcha (case sensitive):");
-        lblCaptcha.setForeground(Color.BLACK);
-        lblCaptcha.setBackground(Color.CYAN);
-        lblCaptcha.setFont(new Font("Tahoma", Font.PLAIN, 25));
-        lblCaptcha.setBounds(350, 525, 350, 52);
-        lblCaptcha.setForeground(new Color(178,34,34));
-        contentPane.add(lblCaptcha);
+        // Adding the captcha image to the frame
+        BufferedImage image = ImageIO.read(new File("./img/Login/CaptchaText.png"));
+        JLabel loadedImage = new JLabel(new ImageIcon(image));
+        loadedImage.setBounds(425, 285, 150, 35);
+        loadedImage.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        loginpanel.add(loadedImage);
+
         JTextField enterCaptcha = new JTextField();
-        enterCaptcha.setColumns(6);
-        enterCaptcha.setFont(new Font("Sogoe Print", Font.BOLD, 20));
-        enterCaptcha.setBounds(720, 533, 100, 35);
+        enterCaptcha.setFont(new Font("Times New Roman", Font.ROMAN_BASELINE, 25));
+        enterCaptcha.setBounds(180, 285, 225, 35);
+        enterCaptcha.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        // Set the "Enter Captcha" as placeholder text
+        enterCaptcha.setText("   Enter Captcha Text");
+        // When text field is clicked, the default text is removed
+        enterCaptcha.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                enterCaptcha.setText("");
+            }
+        });
         // Allow only 6 characters to be entered in the captcha field key listener
         enterCaptcha.addKeyListener(new KeyAdapter() {
             @Override
@@ -174,32 +335,27 @@ public class LoginPage extends JFrame {
                     e.consume();
             }
         });
-        contentPane.add(enterCaptcha);
-
-
-        Calendar now = Calendar.getInstance();
-        final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("IST"));
-            JLabel time = new JLabel(dateFormat.format(now.getTime()));
-        time.setFont(new Font("Segoe Print", Font.BOLD, 18));
-        time.setForeground(new Color(178,34,34));
-        time.setBounds(975, 130, 300, 200);
-        contentPane.add(time);
-        new Timer(1000, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Get the IST time zone and set it to the label to display the time
-                Calendar now = Calendar.getInstance();
-                time.setText(dateFormat.format(now.getTime()));
-            }
-        }).start();
+        loginpanel.add(enterCaptcha);
 
         /* Button to log in as a user (both institution & user level) */
-        btnUserLogin = new JButton("Login");
-        btnUserLogin.setFont(new Font("Tahoma", Font.PLAIN, 26));
-        btnUserLogin.setForeground(new Color(174,34,34));
-        btnUserLogin.setBackground(new Color(0,191,255));
-        btnUserLogin.setBounds(505, 590, 100, 40);
+        btnUserLogin = new JButton("Login as User/Faculty");
+        btnUserLogin.setFont(new Font("Tahoma", Font.PLAIN, 20));
+        btnUserLogin.setForeground(new Color(174, 34, 34));
+        btnUserLogin.setBackground(new Color(255, 192, 203));
+        btnUserLogin.setBounds(400, 355, 215, 35);
+        btnUserLogin.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnUserLogin.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        // Set a green border around the button when the mouse hovers over it and remove it when the mouse exits
+        btnUserLogin.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                btnUserLogin.setBorder(BorderFactory.createLineBorder(Color.GREEN, 3));
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                btnUserLogin.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+            }
+        });
         btnUserLogin.addActionListener(e ->
         {
             String institutionID = String.valueOf(institutionIDField.getText());
@@ -209,30 +365,27 @@ public class LoginPage extends JFrame {
 
             String email = RetrieveEmailID.retrieveEmail(userID);
 
-            if(UserLoginCheck.checkUserLogin(userID, institutionID, password,captchaFromImage,captchaEnteredByUser)) {
-                JOptionPane.showMessageDialog(btnUserLogin, "You have successfully logged in ", "Login Successful", JOptionPane.INFORMATION_MESSAGE);
+            if (UserLoginCheck.checkUserLogin(userID, institutionID, password, captchaFromImage, captchaEnteredByUser)) {
+                JOptionPane.showMessageDialog(btnUserLogin, "Please wait while we log you in", "Logging In", JOptionPane.INFORMATION_MESSAGE);
                 try {
                     LoginNotifier.sendLoginNotification(email, userID);
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    throw new RuntimeException(ex);
                 }
                 UpdateLoginActivity.updateLoginActivity(userID);
+                JOptionPane.showMessageDialog(btnUserLogin, "You have successfully logged in ", "Login Successful", JOptionPane.INFORMATION_MESSAGE);
                 dispose();
-            }
-            else if (institutionID.equals("") || userID.equals("") || password.equals("") || captchaEnteredByUser.equals(""))
-            {
-                JOptionPane.showMessageDialog(null, "One Or More Fields Are Empty", "Empty Fields", JOptionPane.WARNING_MESSAGE);
+            } else if (institutionID.equals("") || userID.equals("") || password.equals("") || captchaEnteredByUser.equals("")) {
+                JOptionPane.showMessageDialog(btnUserLogin, "One Or More Fields Are Empty", "Empty Fields", JOptionPane.WARNING_MESSAGE);
                 if (institutionID.equals(""))
                     institutionIDField.requestFocus();
                 else if (userID.equals(""))
                     userIDField.requestFocus();
-                else if(password.equals(""))
+                else if (password.equals(""))
                     passwordField.requestFocus();
                 else
                     enterCaptcha.requestFocus();
-            }
-            else
-            {
+            } else {
                 JOptionPane.showMessageDialog(btnUserLogin, "Invalid username/password (or) Wrong Captcha text entered!", "Login Error", JOptionPane.ERROR_MESSAGE);
                 userIDField.setText("");
                 passwordField.setText("");
@@ -240,14 +393,27 @@ public class LoginPage extends JFrame {
                 userIDField.requestFocus();
             }
         });
-        contentPane.add(btnUserLogin);
+        loginpanel.add(btnUserLogin);
 
         /* Button to reset the fields */
         JButton btnReset = new JButton("Reset");
-        btnReset.setFont(new Font("Tahoma", Font.PLAIN, 26));
-        btnReset.setForeground(new Color(174,34,34));
-        btnReset.setBackground(new Color(0,191,255));
-        btnReset.setBounds(640, 590, 100, 40);
+        btnReset.setFont(new Font("Tahoma", Font.PLAIN, 20));
+        btnReset.setForeground(new Color(174, 34, 34));
+        btnReset.setBackground(new Color(255, 192, 203));
+        btnReset.setBounds(275, 355, 100, 35);
+        btnReset.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        btnReset.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        // Set a red border around the button when the mouse hovers over it and remove it when the mouse exits
+        btnReset.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                btnReset.setBorder(BorderFactory.createLineBorder(Color.RED, 3));
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                btnReset.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+            }
+        });
         btnReset.addActionListener(e -> {
             int a = JOptionPane.showConfirmDialog(btnReset, "Do you really want to reset all the fields?");
             if (a == JOptionPane.YES_OPTION) {
@@ -258,111 +424,166 @@ public class LoginPage extends JFrame {
                 institutionIDField.requestFocus();
             }
         });
-        contentPane.add(btnReset);
+        loginpanel.add(btnReset);
 
-        /* Button to verify the admin login */
-        JButton btnAdminLogin = new JButton("Administrator Login");
-        btnAdminLogin.setFont(new Font("Tahoma", Font.PLAIN, 18));
-        btnAdminLogin.setBounds(300, 645, 200, 40);
-        btnAdminLogin.setForeground(new Color(174,34,34));
-        btnAdminLogin.setBackground(new Color(0,191,255));
-        btnAdminLogin.addActionListener(e ->
-        {
-            String institutionID = String.valueOf(institutionIDField.getText());
-            String userID = String.valueOf(userIDField.getText());
-            String password = String.valueOf(passwordField.getPassword());
-            captchaEnteredByUser = enterCaptcha.getText();
-            if (AdminLoginCheck.checkAdminLogin(userID, institutionID, password, captchaFromImage, captchaEnteredByUser)) {
-                JOptionPane.showMessageDialog(btnAdminLogin, "You have successfully logged in (Administrator)");
-                dispose();
-            } else if (institutionID.equals("") || userID.equals("") || password.equals("") || captchaEnteredByUser.equals(""))
-            {
-                JOptionPane.showMessageDialog(null, "One Or More Fields Are Empty", "Empty Fields", JOptionPane.WARNING_MESSAGE);
-                if (institutionID.equals(""))
-                    institutionIDField.requestFocus();
-                else if (userID.equals(""))
+        JButton lblInstitutionAdmin = new JButton("  Login as an Institution Admin");
+        lblInstitutionAdmin.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        lblInstitutionAdmin.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        lblInstitutionAdmin.setForeground(new Color(174, 34, 34));
+        lblInstitutionAdmin.setBackground(new Color(255, 192, 203));
+        // Set a green border around the button when the mouse hovers over it and remove it when the mouse exits
+           lblInstitutionAdmin.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    lblInstitutionAdmin.setBorder(BorderFactory.createLineBorder(Color.GREEN, 3));
+                }
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    lblInstitutionAdmin.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+                }
+            });
+        lblInstitutionAdmin.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                String institutionID = String.valueOf(institutionIDField.getText());
+                String userID = String.valueOf(userIDField.getText());
+                String password = String.valueOf(passwordField.getPassword());
+                captchaEnteredByUser = enterCaptcha.getText();
+                if (AdminLoginCheck.checkAdminLogin(userID, institutionID, password, captchaFromImage, captchaEnteredByUser)) {
+                    JOptionPane.showMessageDialog(lblInstitutionAdmin, "You have successfully logged in (Administrator)");
+                    dispose();
+                } else if (institutionID.equals("") || userID.equals("") || password.equals("") || captchaEnteredByUser.equals("")) {
+                    JOptionPane.showMessageDialog(lblInstitutionAdmin, "One Or More Fields Are Empty", "Empty Fields", JOptionPane.WARNING_MESSAGE);
+                    if (institutionID.equals(""))
+                        institutionIDField.requestFocus();
+                    else if (userID.equals(""))
+                        userIDField.requestFocus();
+                    else if (password.equals(""))
+                        passwordField.requestFocus();
+                    else
+                        enterCaptcha.requestFocus();
+                } else {
+                    JOptionPane.showMessageDialog(lblInstitutionAdmin, "Wrong Admin Username/Password (or) Invalid Captcha Entered!", "Login Error", JOptionPane.ERROR_MESSAGE);
+                    userIDField.setText("");
+                    passwordField.setText("");
+                    enterCaptcha.setText("");
                     userIDField.requestFocus();
-                else if(password.equals(""))
-                    passwordField.requestFocus();
-                else
-                    enterCaptcha.requestFocus();
-            }
-            else
-            {
-                JOptionPane.showMessageDialog(btnAdminLogin, "Wrong Admin Username/Password (or) Invalid Captcha Entered!", "Login Error", JOptionPane.ERROR_MESSAGE);
-                userIDField.setText("");
-                passwordField.setText("");
-                enterCaptcha.setText("");
-                userIDField.requestFocus();
+                }
             }
         });
-        contentPane.add(btnAdminLogin);
+        lblInstitutionAdmin.setFont(new Font("Times New Roman", Font.ROMAN_BASELINE, 20));
+        lblInstitutionAdmin.setForeground(new Color(0, 0, 0));
+        lblInstitutionAdmin.setBounds(20, 430, 260, 35);
+        loginpanel.add(lblInstitutionAdmin);
 
-        /* Button to open forget password frame */
-        JButton btnForgetPassword = new JButton("Forget Password?");
-        btnForgetPassword.setFont(new Font("Tahoma", Font.PLAIN, 18));
-        btnForgetPassword.setBounds(525, 645, 180, 40);
-        btnForgetPassword.setForeground(new Color(174,34,34));
-        btnForgetPassword.setBackground(new Color(0,191,255));
-        btnForgetPassword.addActionListener(e ->
-        {
-            dispose();
-            ResetPassword resetPassword = new ResetPassword();
-            resetPassword.setVisible(true);
-        });
-        contentPane.add(btnForgetPassword);
 
-        /* Button to open the registration form */
-        JButton btnRegister = new JButton("Register with Us!");
-        btnRegister.setFont(new Font("Tahoma", Font.PLAIN, 18));
-        btnRegister.setBounds(735, 645, 200, 40);
-        btnRegister.setForeground(new Color(174,34,34));
-        btnRegister.setBackground(new Color(0,191,255));
-        btnRegister.addActionListener(e ->
-        {
-            dispose();
-            /*GetBasicDetails obj = new GetBasicDetails();
-            obj.main(null);*/
-
-        });
-        contentPane.add(btnRegister);
-
-        /* Button to raise query to the dev team */
-        JButton btnHelpQuery = new JButton("Contact Us");
-        btnHelpQuery.setFont(new Font("Tahoma", Font.PLAIN, 18));
-        btnHelpQuery.setBounds(480, 700, 150, 40);
-        btnHelpQuery.setForeground(new Color(174,34,34));
-        btnHelpQuery.setBackground(new Color(0,191,255));
-        btnHelpQuery.addActionListener(e ->
-        {
-            // Do you want to be redirected to the raise query page?
-            int a = JOptionPane.showConfirmDialog(btnHelpQuery, "Do you want to be redirected to the raise query page?");
-            if (a == JOptionPane.YES_OPTION) {
-                dispose();
-                EventQueue.invokeLater(() -> {
-                    try {
-                        HelpForm frame = new HelpForm();
-                        frame.setVisible(true);
-                    } catch (Exception exp1) {
-                        exp1.printStackTrace();
-                    }
-                });
+        // Label that shows "New User? Sign Up"
+        JLabel lblNewUser = new JLabel("New User? Click here to Sign Up");
+        lblNewUser.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        lblNewUser.setFont(new Font("Times New Roman", Font.ROMAN_BASELINE, 20));
+        lblNewUser.setForeground(new Color(0, 0, 0));
+        lblNewUser.setBounds(265, 400, 300, 35);
+        // When mouse is hovered over the label, the label changes colour to blue and underlines the text and
+        // when the mouse is not hovered over the label, the label changes colour to black and removes the underline
+        lblNewUser.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                lblNewUser.setForeground(new Color(0, 0, 255));
+                lblNewUser.setText("<html><u>New User? Click here to Sign Up</u></html>");
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                lblNewUser.setForeground(new Color(0, 0, 0));
+                lblNewUser.setText("New User? Click here to Sign Up");
             }
         });
-        contentPane.add(btnHelpQuery);
+        lblNewUser.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                int a = JOptionPane.showConfirmDialog(institutionIDField, "Do you want to sign up?", "Sign Up", JOptionPane.YES_NO_OPTION);
+                if (a == JOptionPane.YES_OPTION) {
+                    dispose();
+                    EventQueue.invokeLater(() -> {
+                        try {
+//                            SignUp frame = new SignUp();
+//                            frame.setVisible(true);
+                               JOptionPane.showMessageDialog(lblNewUser, "This feature is not available yet", "Unavailable", JOptionPane.INFORMATION_MESSAGE);
+                        } catch (Exception exp1) {
+                            exp1.printStackTrace();
+                        }
+                    });
+                }
+            }
+        });
+        loginpanel.add(lblNewUser);
 
-        /* Button to close the application */
-        JButton btnExit = new JButton("Exit Application");
-        btnExit.setFont(new Font("Tahoma", Font.PLAIN, 18));
-        btnExit.setBounds(680, 700, 200, 40);
-        btnExit.setForeground(new Color(174,34,34));
-        btnExit.setBackground(new Color(0,191,255));
-        btnExit.addActionListener(e ->
-        {
-            int a = JOptionPane.showConfirmDialog(btnExit, "Are you sure you want to exit the application?", "Select", JOptionPane.YES_NO_OPTION);
+        // A Button at right side of lblNewUser to close the application
+        JButton btnClose = new JButton("Exit Application");
+        btnClose.setFont(new Font("Tahoma", Font.PLAIN, 20));
+        btnClose.setForeground(new Color(0, 0, 0));
+        btnClose.setBackground(new Color(255, 192, 203));
+        btnClose.setBounds(530, 430, 170, 40);
+        btnClose.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        btnClose.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        // Set a red border around the button when the mouse hovers over it and remove it when the mouse exits
+        btnClose.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                btnClose.setBorder(BorderFactory.createLineBorder(Color.RED, 3));
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                btnClose.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+            }
+        });
+        btnClose.addActionListener(e -> {
+            int a = JOptionPane.showConfirmDialog(btnClose, "Are you sure you want to exit the application?", "Select", JOptionPane.YES_NO_OPTION);
             if (a == 0)
                 System.exit(0);
         });
-        contentPane.add(btnExit);
+        loginpanel.add(btnClose);
+
+        // A panel at the bottom of the frame to display the current date and time
+        JPanel panellow = new JPanel();
+        panellow.setBounds(0, 732, 1366, 30);
+        // Set red colour to panel background
+        panellow.setBackground(new Color(255, 49, 49));
+        panellow.setLayout(null);
+        contentPane.add(panellow);
+
+        Calendar now = Calendar.getInstance();
+        String labeltime = null;
+        final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("IST"));
+        if(now.get(Calendar.AM_PM) == Calendar.AM)
+            labeltime = dateFormat.format(now.getTime()) + " AM IST";
+        else
+             labeltime = dateFormat.format(now.getTime()) + " PM IST";
+        JLabel time = new JLabel("  " + labeltime);
+        time.setFont(new Font("Segoe Print", Font.BOLD, 18));
+        time.setForeground(Color.WHITE);
+        time.setBounds(1045, 0, 320, 30);
+        Border border1 = BorderFactory.createLineBorder(Color.BLACK, 3);
+        time.setBorder(border1);
+        panellow.add(time);
+        time.setVisible(true);
+        new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Get the IST time zone and set it to the label to display the time
+                Calendar now = Calendar.getInstance();
+                // Set the AM/PM label
+                if (now.get(Calendar.AM_PM) == Calendar.AM)
+                    time.setText("  " + dateFormat.format(now.getTime()) + " AM IST");
+                else
+                    time.setText("  " + dateFormat.format(now.getTime()) + " PM IST");
+            }
+        }).start();
+
+        JLabel lblDevelopedBy = new JLabel("Developed By: Yogesh S and Sakthipriyan S , CSE Department, Mepco Schlenk Engineering College, Sivakasi");
+        lblDevelopedBy.setFont(new Font("Segoe Print", Font.BOLD, 18));
+        lblDevelopedBy.setForeground(Color.WHITE);
+        lblDevelopedBy.setBounds(35, 0, 1078, 30);
+        panellow.add(lblDevelopedBy);
+
     }
+
 }

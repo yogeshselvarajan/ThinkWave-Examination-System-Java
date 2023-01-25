@@ -1,5 +1,7 @@
 package SecureHash;
 
+import DatabaseFunctions.RetrieveSaltValue;
+
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.security.NoSuchAlgorithmException;

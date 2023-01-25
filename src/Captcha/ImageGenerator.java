@@ -17,7 +17,7 @@ public class ImageGenerator {
         // Create image showing the string generated, to prevent the ability to copy/paste the string
         BufferedImage img = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = img.createGraphics();
-        Font font = new Font("Arial", Font.PLAIN, 48);
+        Font font = new Font("Times New Roman", Font.PLAIN, 30);
         g2d.setFont(font);
         FontMetrics fm = g2d.getFontMetrics();
         int width = fm.stringWidth(text);
