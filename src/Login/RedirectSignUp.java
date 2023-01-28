@@ -140,6 +140,22 @@ public class RedirectSignUp extends JFrame {
                 lblSignUp.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
             }
         });
+
+        // When the label is clicked, open the SignUp page
+        lblSignUp.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                dispose();
+                EventQueue.invokeLater(() -> {
+                    try {
+                        SignUp frame = new SignUp();
+                        frame.setVisible(true);
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                    }
+                });
+            }
+        });
         paneltop.add(lblSignUp);
 
         // Email ICON to the side of the label with text "Sign Up" with border around it

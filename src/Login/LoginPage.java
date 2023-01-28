@@ -341,11 +341,11 @@ public class LoginPage extends JFrame {
         loginpanel.add(enterCaptcha);
 
         /* Button to log in as a user (both institution & user level) */
-        btnUserLogin = new JButton("Login as User/Faculty");
+        btnUserLogin = new JButton("Login");
         btnUserLogin.setFont(new Font("Tahoma", Font.PLAIN, 20));
         btnUserLogin.setForeground(new Color(174, 34, 34));
         btnUserLogin.setBackground(new Color(255, 192, 203));
-        btnUserLogin.setBounds(400, 355, 215, 35);
+        btnUserLogin.setBounds(400, 355, 105, 35);
         btnUserLogin.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnUserLogin.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
         // Set a green border around the button when the mouse hovers over it and remove it when the mouse exits
@@ -435,7 +435,7 @@ public class LoginPage extends JFrame {
         lblNewUser.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         lblNewUser.setFont(new Font("Times New Roman", Font.ROMAN_BASELINE, 20));
         lblNewUser.setForeground(new Color(0, 0, 0));
-        lblNewUser.setBounds(275, 390, 330, 35);    
+        lblNewUser.setBounds(225, 390, 330, 35);
         lblNewUser.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -467,7 +467,7 @@ public class LoginPage extends JFrame {
         btnClose.setFont(new Font("Tahoma", Font.PLAIN, 20));
         btnClose.setForeground(new Color(0, 0, 0));
         btnClose.setBackground(new Color(255, 192, 203));
-        btnClose.setBounds(330, 430, 170, 40);
+        btnClose.setBounds(300, 430, 170, 40);
         btnClose.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
         btnClose.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         // Set a red border around the button when the mouse hovers over it and remove it when the mouse exits
