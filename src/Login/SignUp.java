@@ -5,15 +5,20 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Random;
 import java.util.TimeZone;
+
+import static DatabaseFunctions.NewSignUp.CheckValidAdminID.checkValidAdminID;
+import static DatabaseFunctions.NewSignUp.FetchLatestInstituteID.fetchLatestInstituteID;
+import static DatabaseFunctions.NewSignUp.InsertSignUp.insertUser;
+import static Mail.SendRegisterEmail.sendRegisterEmail;
+import static Mail.VerifyEmailForAdmin.generateVerificationCode;
+import static Mail.VerifyEmailForAdmin.sendAdminVerificationEmail;
 
 public class SignUp extends JFrame
 {
@@ -36,15 +41,13 @@ public class SignUp extends JFrame
         setContentPane(mainPanel);
         mainPanel.setLayout(null);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setUndecorated(true);
+        setUndecorated(false);
         setAlwaysOnTop(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Border border = BorderFactory.createLineBorder(Color.BLACK, 3);
+        final String[] code = {null};
+        final String[] emailverification = {null};
 
-        /*JLabel bg = new JLabel();
-        bg.setIcon(new ImageIcon("./img/Register/5562402_21421.jpg"));
-        bg.setBounds(125, 200, 600, 400);
-        mainPanel.add(bg);*/
 
         // Add a panel at the top of the frame
         JPanel panelheader = new JPanel();
@@ -131,9 +134,9 @@ public class SignUp extends JFrame
         JTextField txtInstitutionNumber = new JTextField();
         txtInstitutionNumber.setFont(new Font("Times New Roman", Font.PLAIN, 20));
         txtInstitutionNumber.setForeground(Color.BLACK);
-        txtInstitutionNumber.setBounds(250, 70, 65, 40);
-        // The generateInstNumber() method is used to generate the institution number
-        txtInstitutionNumber.setText(generateInstitutionCode());
+        txtInstitutionNumber.setBounds(250, 70, 80, 40);
+        // The fetchLatestInstituteID() method is used to get the latest institution number that is unique
+        txtInstitutionNumber.setText(fetchLatestInstituteID());
         txtInstitutionNumber.setEditable(false);
         paneltop.add(txtInstitutionNumber);
 
@@ -142,7 +145,7 @@ public class SignUp extends JFrame
         JTextField txtNameOfInstitution = new JTextField();
         txtNameOfInstitution.setFont(new Font("Times New Roman", Font.PLAIN, 20));
         txtNameOfInstitution.setForeground(Color.BLACK);
-        txtNameOfInstitution.setBounds(325, 70, 380, 40);
+        txtNameOfInstitution.setBounds(340, 70, 365, 40);
         txtNameOfInstitution.setText("Enter Institution Name");
 txtNameOfInstitution.addFocusListener(new FocusAdapter() {
             @Override
@@ -261,7 +264,21 @@ txtNameOfInstitution.addFocusListener(new FocusAdapter() {
         btnObtainCode.setFont(new Font("Tahoma", Font.BOLD, 18));
         btnObtainCode.setForeground(Color.BLACK);
         btnObtainCode.setBounds(305, 350, 150, 40);
+        // When the button is clicked, the code is sent to the admin email id
+        btnObtainCode.addActionListener(e -> {
+            // The code is sent to the admin email id
+            String to = txtAdminEmailID.getText();
+            try {
+                code[0] = generateVerificationCode();
+                sendAdminVerificationEmail(to, code[0]);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+            // Diplays a message to the user that the code has been sent to the admin email id
+            JOptionPane.showMessageDialog(btnObtainCode, "Verification Code has been sent to the Admin Email ID. Please check your email inbox/ spam folder. If you do not receive the email, please check your internet connection and try again.", "Verification Code Sent", JOptionPane.INFORMATION_MESSAGE);
+        });
         paneltop.add(btnObtainCode);
+
         // A text field to get the code sent to the admin email id parallel to the button
         JTextField txtCode = new JTextField();
         txtCode.setFont(new Font("Times New Roman", Font.PLAIN, 16));
@@ -339,7 +356,6 @@ txtNameOfInstitution.addFocusListener(new FocusAdapter() {
         txtPassword.setForeground(Color.BLACK);
         txtPassword.setBounds(305, 470, 300, 40);
         txtPassword.setEchoChar('*');
-//        txtPassword.setText("Password should contain 1 uppercase, 1 lowercase, 1 number and 1 special character");
         paneltop.add(txtPassword);
 
         // A icon to show the password next to the password text field
@@ -369,6 +385,18 @@ txtNameOfInstitution.addFocusListener(new FocusAdapter() {
         btnSignUp.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnSignUp.addActionListener( e ->
         {
+            String insID = txtInstitutionNumber.getText();
+            String institutionName = txtNameOfInstitution.getText();
+            String address = txtAddressOfInstitution.getText();
+            String collegeEmailID = txtCollegeEmailID.getText();
+            String adminEmailID = txtAdminEmailID.getText();
+            String verifycode = txtCode.getText();
+            String adminID = txtUsername.getText();
+            String password = Arrays.toString(txtPassword.getPassword());
+            // if the verification code is correct, then the emailverification variable is set to 'Y' else 'N'
+            if (verifycode.equals(code[0])) emailverification[0] = "Y";
+            else emailverification[0] = "N";
+
             // Check if all the fields institution name,address,email id, admin email,code, username and password are filled
             if (txtNameOfInstitution.getText().equals("") || txtNameOfInstitution.getText().equals("Enter Institution Name") ||
                     txtAddressOfInstitution.getText().equals("") || txtAddressOfInstitution.getText().equals("Enter Address") ||
@@ -380,16 +408,42 @@ txtNameOfInstitution.addFocusListener(new FocusAdapter() {
                 JOptionPane.showMessageDialog(btnSignUp, "Please fill all the fields");
 
             }
-
-            if (!isStrongPassword(txtPassword.getText())) {
+            // If the fields are filled, check if the password is strong enough
+            else if (!isStrongPassword(Arrays.toString(txtPassword.getPassword()))) {
                 JOptionPane.showMessageDialog(btnSignUp, "Password is not strong enough");
                 txtPassword.setText("");
                 txtPassword.requestFocus();
             }
-            else {
-                // If the password is strong enough, then the user is registered
-                JOptionPane.showMessageDialog(btnSignUp, "You have been registered successfully");
+            // If the password is strong enough, check if the admin ID is already taken
+            else
+            {
+                try
+                {
+                    if(!checkValidAdminID(txtUsername.getText())==false)
+                    {
+                        JOptionPane.showMessageDialog(btnSignUp, "Admin ID already taken! Please try another one", "Error", JOptionPane.ERROR_MESSAGE);
+                        txtUsername.setText("");
+                        txtUsername.requestFocus();
+                    }
+                }catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
+            // If the admin ID is not taken, check if the verfication code is correct and set email verification to 'Y' or 'N'
+            // Check if the verification code is correct
+            if (emailverification[0].equals("N"))
+            {
+                JOptionPane.showMessageDialog(btnSignUp, "Invalid Code! Please try again", "Error", JOptionPane.ERROR_MESSAGE);
+                txtCode.setText("");
+                txtCode.requestFocus();
+            }
+            else
+            {
+                insertUser(password, adminID, collegeEmailID,emailverification[0],insID,adminEmailID,institutionName,address);
+                // Send Registration Successful email to the admin
+                    sendRegisterEmail(adminEmailID,institutionName,address,collegeEmailID,insID,adminID,password);
+                    JOptionPane.showMessageDialog(btnSignUp, "You have been registered successfully");
+                }
         });
         paneltop.add(btnSignUp);
 
@@ -433,8 +487,8 @@ txtNameOfInstitution.addFocusListener(new FocusAdapter() {
         });
         paneltop.add(lblSignIn);
 
-        // A label with red warning text to display  If your a student/faculty, please contact your institution to provide you with an account
-        JLabel lblWarning = new JLabel("If your a student/faculty, please contact your institution to provide you with an account");
+        // A label with red warning text to display  If you're a student/faculty, please contact your institution to provide you with an account
+        JLabel lblWarning = new JLabel("If you're a student/faculty, please contact your institution to provide you with an account");
         lblWarning.setFont(new Font("Times New Roman", Font.PLAIN, 18));
         lblWarning.setForeground(Color.RED);
         lblWarning.setBounds(50, 580, 800, 40);
@@ -481,63 +535,6 @@ txtNameOfInstitution.addFocusListener(new FocusAdapter() {
 
     }
 
-    // Function to generate a random 5 long code that has INS + 2 random numbers unique to the institution
-    public String generateInstitutionCode() {
-        String code = "INS";
-        Random rand = new Random();
-        int num1 = rand.nextInt(10);
-        int num2 = rand.nextInt(10);
-        code = code + num1 + num2;
-        return code;
-    }
-
-   /* // Function to check if t`he institution code is unique
-    public boolean checkInstitutionCode(String code) {
-        try {
-            //            // Connect to the database
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/attendance", "root", "");
-            // Create a statement
-            Statement stmt = con.createStatement();
-            // Execute the query
-            ResultSet rs = stmt.executeQuery("select * from institution where institution_code = '" + code + "'");
-            // If the result set is empty, the code is unique
-            if (!rs.next()) {
-                return true;
-            }
-            // If the result set is not empty, the code is not unique
-            else {
-                return false;
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-            return false;
-        }
-    }
-
-    // Function to check if the username is unique
-    public boolean checkUsername(String username) {
-        try {
-            // Connect to the database
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/attendance", "root", "");
-            // Create a statement
-            Statement stmt = con.createStatement();
-            // Execute the query
-            ResultSet rs = stmt.executeQuery("select * from institution where username = '" + username + "'");
-            // If the result set is empty, the username is unique
-            if (!rs.next()) {
-                return true;
-            }
-            // If the result set is not empty, the username is not unique
-            else {
-                return false;
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-            return false;
-        }
-    }*/
-
-
     // Function to check if the password is strong enough
     public boolean isStrongPassword(String password) {
         // Check if the password is at least 8 characters long
@@ -557,11 +554,7 @@ txtNameOfInstitution.addFocusListener(new FocusAdapter() {
             return false;
         }
         // Check if the password contains at least one special character
-        if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*")) {
-            return false;
-        }
+        return password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*");
         // If all the conditions are satisfied, the password is strong enough
-        return true;
     }
-
 }

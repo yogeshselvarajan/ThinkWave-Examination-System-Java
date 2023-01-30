@@ -45,7 +45,7 @@ create table C##THINKWAVE.INSTRUCTOR_TABLE
     INSTRUCTOR_EMAIL_VERIFIED CHAR          not null,
     INSTITUTE_ID              VARCHAR2(5)   not null
         constraint INSTRUCTOR_TABLE_INSTITUTION_TABLE_INSTITUTION_ADMIN_ID_FK
-            references C##THINKWAVE.INSTITUTION_TABLE
+            references C##THINKWAVE.INSTITUTION_ADMIN
                 on delete cascade
 );
 
