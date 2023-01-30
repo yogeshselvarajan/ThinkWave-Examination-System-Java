@@ -6,14 +6,13 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import static DatabaseFunctions.NewSignUp.CheckValidAdminID.checkValidAdminID;
+import static DatabaseFunctions.NewSignUp.CheckAdminIDExists.checkAdminID;
 import static DatabaseFunctions.NewSignUp.FetchLatestInstituteID.fetchLatestInstituteID;
 import static DatabaseFunctions.NewSignUp.InsertSignUp.insertUser;
 import static Mail.SendRegisterEmail.sendRegisterEmail;
@@ -392,9 +391,10 @@ txtNameOfInstitution.addFocusListener(new FocusAdapter() {
             String adminEmailID = txtAdminEmailID.getText();
             String verifycode = txtCode.getText();
             String adminID = txtUsername.getText();
-            String password = Arrays.toString(txtPassword.getPassword());
+            String password =  txtPassword.getText();
             // if the verification code is correct, then the emailverification variable is set to 'Y' else 'N'
-            if (verifycode.equals(code[0])) emailverification[0] = "Y";
+            if (verifycode.equals(code[0]))
+                emailverification[0] = "Y";
             else emailverification[0] = "N";
 
             // Check if all the fields institution name,address,email id, admin email,code, username and password are filled
@@ -414,28 +414,21 @@ txtNameOfInstitution.addFocusListener(new FocusAdapter() {
                 txtPassword.setText("");
                 txtPassword.requestFocus();
             }
-            // If the password is strong enough, check if the admin ID is already taken
-            else
-            {
-                try
-                {
-                    if(!checkValidAdminID(txtUsername.getText())==false)
-                    {
-                        JOptionPane.showMessageDialog(btnSignUp, "Admin ID already taken! Please try another one", "Error", JOptionPane.ERROR_MESSAGE);
-                        txtUsername.setText("");
-                        txtUsername.requestFocus();
-                    }
-                }catch (SQLException ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
+
             // If the admin ID is not taken, check if the verfication code is correct and set email verification to 'Y' or 'N'
             // Check if the verification code is correct
-            if (emailverification[0].equals("N"))
+            else if (emailverification[0].equals("N"))
             {
                 JOptionPane.showMessageDialog(btnSignUp, "Invalid Code! Please try again", "Error", JOptionPane.ERROR_MESSAGE);
                 txtCode.setText("");
                 txtCode.requestFocus();
+            }
+            // If the verification code is correct, check if the email ID is already taken
+            else if(checkAdminID(adminID))
+            {
+                        JOptionPane.showMessageDialog(btnSignUp, "Admin ID already taken! Please try another one", "Error", JOptionPane.ERROR_MESSAGE);
+                        txtUsername.setText("");
+                        txtUsername.requestFocus();
             }
             else
             {

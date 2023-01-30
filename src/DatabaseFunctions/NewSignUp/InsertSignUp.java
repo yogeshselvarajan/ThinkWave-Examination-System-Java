@@ -3,10 +3,7 @@ package DatabaseFunctions.NewSignUp;
 import SecureHash.PassBasedEnc;
 
 import javax.swing.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class InsertSignUp
 {
@@ -39,23 +36,22 @@ public class InsertSignUp
             pst.setString(8,InstName);
             pst.setString(9,instAddress);
             // Execute the query
-            pst.executeUpdate();
+            ResultSet rs = pst.executeQuery();
+            rs.close();
+            pst.close();
             connection.setAutoCommit(false);
             connection.commit();
             connection.close();
         } catch (SQLException sqlException) {
             sqlException.printStackTrace();
-            if (connection != null) {
-                try{
-                    // If there is an error, rollback the changes
-                    connection.rollback();
-                    // Prompt the user that the registration was unsuccessful
-                    JOptionPane.showMessageDialog(null, "An error occurred while registering the user. Please try again later.");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+            try {
+                connection.rollback();
+                JOptionPane.showMessageDialog(null, "Oops! Something went wrong and we couldn't register you. Please try again later.", "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
         }
     }
 }
+
 
