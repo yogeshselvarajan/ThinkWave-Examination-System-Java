@@ -6,9 +6,8 @@ import java.sql.*;
 
 public class UpdatePassword {
     public static void updatePassword(String userId, String password) {
-        PassBasedEnc ob = new PassBasedEnc();
         String salt = RetrieveSaltValue.retrieveSalt(userId);
-        String securePassword = ob.generateSecurePassword(password, salt);
+        String securePassword = PassBasedEnc.generateSecurePassword(password, salt);
         try {
             Connection connection = (Connection) DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:orcl",
                     "c##thinkwave", "orcl");
@@ -21,6 +20,7 @@ public class UpdatePassword {
             rs.close();
             st.close();
             connection.setAutoCommit(false);
+            connection.commit();
             connection.close();
         } catch (SQLException sqlException) {
             sqlException.printStackTrace();

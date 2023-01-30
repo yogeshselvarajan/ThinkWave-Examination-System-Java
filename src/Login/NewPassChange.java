@@ -81,9 +81,10 @@ public class NewPassChange extends JFrame {
                 confirmPasswordField.setText("");
                 passwordField.requestFocus();
             } else {
-                // Check if  the password and confirm password fields are same
+                // Check if  the password and confirm password fields are same, then set the password in a variable
+                String password = new String(passwordField.getPassword());
 
-                UpdatePassword.updatePassword((retrieveUserID(email)), Arrays.toString(passwordField.getPassword()));
+                UpdatePassword.updatePassword((retrieveUserID(email)), password);
                 JOptionPane.showMessageDialog(changeButton, "Password changed successfully and you will be redirected to login page.", "Success", JOptionPane.INFORMATION_MESSAGE);
 
                 String subject = "Password Changed! - ThinkWave";

@@ -201,13 +201,13 @@ public class LoginPage extends JFrame {
         loginpanel.add(lblInstituteID);
         institutionIDField = new JTextField();
         institutionIDField.setFont(new Font("Segoe Print", Font.PLAIN, 22));
-        institutionIDField.setBounds(325, 60, 85, 30);
+        institutionIDField.setBounds(325, 60, 100, 30);
         institutionIDField.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         // Action Listener to allow at most 5 characters to be entered in the text field
         institutionIDField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-                if (institutionIDField.getText().length() >= 5) // limit textfield to 5 characters
+                if (institutionIDField.getText().length() >= 7) // limit textfield to 5 characters
                     e.consume();
             }
         });
@@ -221,8 +221,8 @@ public class LoginPage extends JFrame {
         lblUserID.setForeground(new Color(178, 34, 34));
         loginpanel.add(lblUserID);
         userIDField = new JTextField();
-        userIDField.setFont(new Font("Sogoe Print", Font.PLAIN, 22));
-        userIDField.setBounds(325, 125, 80, 35);
+        userIDField.setFont(new Font("Times New Roman", Font.PLAIN, 22));
+        userIDField.setBounds(325, 125, 100, 35);
         // Action Listener to allow at most 5 characters to be entered in the text field
         userIDField.addKeyListener(new KeyAdapter() {
             @Override
