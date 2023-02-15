@@ -1,12 +1,12 @@
 package DatabaseFunctions;
 
-import org.jetbrains.annotations.Nullable;
+
 import java.sql.*;
 
 public class CheckConnection
 {
     // Function to check the connection to the database
-    public static @Nullable Connection getConnection() {
+    public static Connection getConnection() {
         try
         {
             String driver = "oracle.jdbc.driver.OracleDriver";
