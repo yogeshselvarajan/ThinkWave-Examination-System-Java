@@ -1,6 +1,7 @@
 package Login;
 
 import DatabaseFunctions.CheckEmailExists;
+import DateTime.DateTimePanel;
 import Mail.MailSender;
 import RegexChecks.CheckEmail;
 
@@ -249,6 +250,10 @@ public class ResetPassword extends JFrame
             }
         });
         frame.add(btnExit);
+
+        DateTimePanel dateTimePanel = new DateTimePanel();
+        dateTimePanel.addTimeFooter(frame);
+        dateTimePanel.setVisible(true);
     }
 }
 

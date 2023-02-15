@@ -1,6 +1,7 @@
 package Login;
 
 import DatabaseFunctions.UpdatePassword;
+import DateTime.DateTimePanel;
 import Mail.MailSender;
 
 import javax.imageio.ImageIO;
@@ -122,6 +123,10 @@ public class NewPassChange extends JFrame {
                 throw new RuntimeException(ex);
             }
         });
+
+        DateTimePanel dateTimePanel = new DateTimePanel();
+        dateTimePanel.addTimeFooter(panel);
+        dateTimePanel.setVisible(true);
 
     }
 }

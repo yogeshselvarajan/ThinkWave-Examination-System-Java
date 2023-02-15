@@ -1,5 +1,7 @@
 package Login;
 
+import DateTime.DateTimePanel;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
@@ -40,7 +42,7 @@ public class SignUp extends JFrame
         setContentPane(mainPanel);
         mainPanel.setLayout(null);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setUndecorated(false);
+        setUndecorated(true);
         setAlwaysOnTop(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Border border = BorderFactory.createLineBorder(Color.BLACK, 3);
@@ -488,43 +490,9 @@ txtNameOfInstitution.addFocusListener(new FocusAdapter() {
         paneltop.add(lblWarning);
 
         // A panel at the bottom of the frame to display the current date and time
-        JPanel panellow = new JPanel();
-        panellow.setBounds(0, 735, 1366, 30);
-        // Set red colour to panel background
-        panellow.setBackground(new Color(255, 49, 49));
-        panellow.setLayout(null);
-        mainPanel.add(panellow);
-
-        Calendar now = Calendar.getInstance();
-        String labeltime;
-        final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("IST"));
-        if(now.get(Calendar.AM_PM) == Calendar.AM)
-            labeltime = dateFormat.format(now.getTime()) + " AM IST";
-        else
-            labeltime = dateFormat.format(now.getTime()) + " PM IST";
-        JLabel time = new JLabel("  " + labeltime);
-        time.setFont(new Font("Segoe Print", Font.BOLD, 18));
-        time.setForeground(Color.WHITE);
-        time.setBounds(1045, 0, 320, 30);
-        Border border1 = BorderFactory.createLineBorder(Color.BLACK, 3);
-        time.setBorder(border1);
-        panellow.add(time);
-        time.setVisible(true);
-        new Timer(1000, e -> {
-            // Get the IST time zone and set it to the label to display the time
-            Calendar now1 = Calendar.getInstance();
-            // Set the AM/PM label
-            if (now1.get(Calendar.AM_PM) == Calendar.AM)
-                time.setText("  " + dateFormat.format(now1.getTime()) + " AM IST");
-            else
-                time.setText("  " + dateFormat.format(now1.getTime()) + " PM IST");
-        }).start();
-        JLabel lblDevelopedBy = new JLabel("Developed By: Yogesh S and Sakthipriyan S , CSE Department, Mepco Schlenk Engineering College, Sivakasi");
-        lblDevelopedBy.setFont(new Font("Segoe Print", Font.BOLD, 18));
-        lblDevelopedBy.setForeground(Color.WHITE);
-        lblDevelopedBy.setBounds(35, 3, 1078, 30);
-        panellow.add(lblDevelopedBy);
+        DateTimePanel dateTimePanel = new DateTimePanel();
+        dateTimePanel.addTimeFooter(mainPanel);
+        dateTimePanel.setVisible(true);
 
     }
 

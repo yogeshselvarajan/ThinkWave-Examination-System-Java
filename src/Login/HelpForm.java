@@ -1,5 +1,6 @@
 package Login;
 
+import DateTime.DateTimePanel;
 import Mail.MailSender;
 import RegexChecks.CheckEmail;
 import RegexChecks.CheckPhoneIndian;
@@ -315,5 +316,9 @@ public class HelpForm extends JFrame {
             }
         });
         contentPane.add(exitButton);
+
+        DateTimePanel dateTimePanel = new DateTimePanel();
+        dateTimePanel.addTimeFooter(contentPane);
+        dateTimePanel.setVisible(true);
     }
 }
