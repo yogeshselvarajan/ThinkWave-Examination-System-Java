@@ -11,13 +11,13 @@ public class UpdateLoginActivity {
     // function to update the login activity of the user in the database
     public static void updateLoginActivity(String userId) {
         try {
-            Connection connection = (Connection) DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:orcl",
-                    "c##thinkwave", "orcl");
+            Connection connection = DriverManager.getConnection(
+                    "jdbc:sqlserver://thinkwaveappln.database.windows.net:1433;database=orcl;user=thinkwave@thinkwaveappln;password=Mepcocollege1@;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;");
+
             PreparedStatement st = (PreparedStatement) connection
-                    .prepareStatement("UPDATE C##THINKWAVE.USER_TABLE SET LAST_ACTIVITY=SYSDATE WHERE ID=?");
+                    .prepareStatement("UPDATE THINKWAVE.USER_TABLE SET LAST_LOGIN = SYSDATETIME() WHERE USER_ID = ?");
             st.setString(1, userId);
-            ResultSet rs = st.executeQuery();
-            rs.close();
+            int rs = st.executeUpdate();
             st.close();
             connection.setAutoCommit(false);
             connection.commit();

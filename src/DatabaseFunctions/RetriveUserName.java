@@ -7,10 +7,11 @@ public class RetriveUserName
     public static String getUserName(String userID) {
         String userName = null;
         try {
-            Connection connection = (Connection) DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:orcl",
-                    "system", "orcl");
+            Connection connection = DriverManager.getConnection(
+                    "jdbc:sqlserver://thinkwaveappln.database.windows.net:1433;database=orcl;user=thinkwave@thinkwaveappln;password=Mepcocollege1@;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;");
+
             PreparedStatement st = (PreparedStatement) connection
-                    .prepareStatement("Select ID, NAME from C##THINKWAVE.USER_TABLE where ID=? ");
+                    .prepareStatement("Select USER_ID,NAME from THINKWAVE.USER_TABLE where USER_ID = ?");
             st.setString(1, userID);
 
             ResultSet rs = st.executeQuery();

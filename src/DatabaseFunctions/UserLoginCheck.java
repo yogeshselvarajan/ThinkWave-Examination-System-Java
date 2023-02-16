@@ -10,10 +10,11 @@ public class UserLoginCheck {
         String passhash = passArray[0];
         String passsalt = passArray[1];
         try {
-            Connection connection = (Connection) DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:orcl",
-                    "c##thinkwave", "orcl");
+            Connection connection = DriverManager.getConnection(
+                    "jdbc:sqlserver://thinkwaveappln.database.windows.net:1433;database=orcl;user=thinkwave@thinkwaveappln;password=Mepcocollege1@;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;");
+
             PreparedStatement st = (PreparedStatement) connection
-                    .prepareStatement("Select ID, INSTID from C##THINKWAVE.USER_TABLE where ID=? and INSTID=? ");
+                    .prepareStatement("Select USER_ID, INSTID from THINKWAVE.USER_TABLE where USER_ID=? and INSTID=? ");
             st.setString(1, userId);
             st.setString(2, institutionId);
 

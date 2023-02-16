@@ -9,12 +9,11 @@ public class CheckConnection
     public static Connection getConnection() {
         try
         {
-            String driver = "oracle.jdbc.driver.OracleDriver";
-            String url = "jdbc:oracle:thin:@localhost:1521:orcl";
-            String username = "c##thinkwave";
-            String password = "orcl";
-            Class.forName(driver);
-            return DriverManager.getConnection(url, username, password);
+            String jdbcDriver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+            String dbUrl = "jdbc:sqlserver://thinkwaveappln.database.windows.net:1433;database=orcl;user=thinkwave@thinkwaveappln;password=Mepcocollege1@;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;";
+
+            Class.forName(jdbcDriver);
+            return DriverManager.getConnection(dbUrl);
         }
         catch(Exception e)
         {

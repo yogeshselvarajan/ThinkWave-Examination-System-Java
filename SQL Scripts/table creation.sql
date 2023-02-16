@@ -120,3 +120,12 @@ create table C##THINKWAVE.USER_EXAM_ENROLL_TABLE
     ENROLL_STATUS       CHAR        not null
 );
 
+create table C##THINKWAVE.QUESTION_BANK
+(
+    ID           NUMBER        not null
+        primary key,
+    EXAM_NAME    VARCHAR2(100) not null,
+    SUBJECT      VARCHAR2(50)  not null,
+    YEAR         NUMBER(4)     not null,
+    QUESTION_PDF BLOB          not null
+);

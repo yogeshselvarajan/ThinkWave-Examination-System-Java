@@ -8,10 +8,11 @@ public class RetrieveSecuredPass {
         String passsalt = null;
  
         try {
-            Connection connection = (Connection) DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:orcl",
-                    "system", "orcl");
+            Connection connection = DriverManager.getConnection(
+                    "jdbc:sqlserver://thinkwaveappln.database.windows.net:1433;database=orcl;user=thinkwave@thinkwaveappln;password=Mepcocollege1@;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;");
+
             PreparedStatement st = (PreparedStatement) connection
-                    .prepareStatement("Select ID, INSTID, PASSW_HASH,PASSW_SALT from C##THINKWAVE.USER_TABLE where ID=? and INSTID=? ");
+                    .prepareStatement("Select USER_ID, INSTID, PASSW_HASH,PASSW_SALT from THINKWAVE.USER_TABLE where USER_ID=? and INSTID=? ");
             st.setString(1, userId);
             st.setString(2, institutionId);
 
