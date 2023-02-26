@@ -14,7 +14,7 @@ public class UpdatePassword {
 
             // Update the PASSW_HASH, PASSW_SALT for the userid in the database
             PreparedStatement st = (PreparedStatement) connection
-                    .prepareStatement("UPDATE C##THINKWAVE.USER_TABLE SET PASSW_HASH=?  WHERE USER_ID =?");
+                    .prepareStatement("UPDATE THINKWAVE.USER_AUTHENTICATION SET PASSW_HASH=?, PASSW_SALT=? WHERE USER_ID=?");
             st.setString(1, securePassword);
             st.setString(2,userId);
             int rs = st.executeUpdate();

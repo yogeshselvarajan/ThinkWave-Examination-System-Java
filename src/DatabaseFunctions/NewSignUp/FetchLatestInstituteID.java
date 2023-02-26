@@ -9,8 +9,9 @@ public class FetchLatestInstituteID {
         String latestInstituteID = null;
 
         try {
-            Connection connection = (Connection) DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:orcl",
-                    "c##thinkwave", "orcl");
+            Connection connection = DriverManager.getConnection(
+                    "jdbc:sqlserver://thinkwaveappln.database.windows.net:1433;database=orcl;user=thinkwave@thinkwaveappln;password=Mepcocollege1@;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;");
+
             // Query to fetch the LATEST C##THINKWAVE.INSTITUTION_ADMIN.INST_ID FROM INSTITUTION_ADMIN TABLE by sorting it in descending order and fetching the first row
             PreparedStatement st = (PreparedStatement) connection
                     .prepareStatement("Select MAX(C##THINKWAVE.INSTITUTION_ADMIN.INST_ID) from C##THINKWAVE.INSTITUTION_ADMIN order by C##THINKWAVE.INSTITUTION_ADMIN.INST_ID desc");

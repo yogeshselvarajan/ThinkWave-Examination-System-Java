@@ -16,11 +16,13 @@ public class CheckAdminIDExists
     try
     {
     // Create a connection to the database
-    Connection conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:orcl", "c##thinkwave", "orcl");
-    // Create a statement to execute the query
+      Connection conn = DriverManager.getConnection(
+              "jdbc:sqlserver://thinkwaveappln.database.windows.net:1433;database=orcl;user=thinkwave@thinkwaveappln;password=Mepcocollege1@;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;");
+
+      // Create a statement to execute the query
     Statement statement = conn.createStatement();
     // Create a result set to hold the results of the query
-    ResultSet rs = statement.executeQuery("SELECT ADMIN_USER_ID FROM INSTITUTION_ADMIN WHERE ADMIN_USER_ID = '" + adminID + "'");
+    ResultSet rs = statement.executeQuery("SELECT USER_ID FROM THINKWAVE.USER_AUTHENTICATION WHERE ROLE = 'Admin' AND USER_ID = '" + adminID + "'");
     // If rs.next() returns true, then the admin ID is already in the database
     if(rs.next())
     {

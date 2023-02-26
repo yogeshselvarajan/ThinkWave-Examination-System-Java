@@ -14,7 +14,7 @@ public class UserLoginCheck {
                     "jdbc:sqlserver://thinkwaveappln.database.windows.net:1433;database=orcl;user=thinkwave@thinkwaveappln;password=Mepcocollege1@;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;");
 
             PreparedStatement st = (PreparedStatement) connection
-                    .prepareStatement("Select USER_ID, INSTID from THINKWAVE.USER_TABLE where USER_ID=? and INSTID=? ");
+                    .prepareStatement("Select USER_ID, INSTID from THINKWAVE.USER_DETAILS where USER_ID=? and INSTID=? ");
             st.setString(1, userId);
             st.setString(2, institutionId);
 

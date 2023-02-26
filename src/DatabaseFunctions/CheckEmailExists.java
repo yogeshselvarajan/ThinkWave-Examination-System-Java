@@ -12,7 +12,7 @@ public class CheckEmailExists {
                           "jdbc:sqlserver://thinkwaveappln.database.windows.net:1433;database=orcl;user=thinkwave@thinkwaveappln;password=Mepcocollege1@;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;");
 
                   PreparedStatement st = (PreparedStatement) connection
-                          .prepareStatement("Select EMAIL,USER_ID from C##THINKWAVE.USER_TABLE where EMAIL=?");
+                          .prepareStatement("Select EMAIL,USER_ID from THINKWAVE.USER_DETAILS where EMAIL=?");
                 st.setString(1, email);
                 ResultSet rs = st.executeQuery();
                 if (rs.next()) {

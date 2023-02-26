@@ -6,6 +6,7 @@ import DatabaseFunctions.UpdateLoginActivity;
 import DatabaseFunctions.UserLoginCheck;
 import DateTime.DateTimePanel;
 import Mail.LoginNotifier;
+import DatabaseFunctions.RetriveRole;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -377,7 +378,8 @@ public class LoginPage extends JFrame {
                     throw new RuntimeException(ex);
                 }
                 UpdateLoginActivity.updateLoginActivity(userID);
-                JOptionPane.showMessageDialog(btnUserLogin, "You have successfully logged in ", "Login Successful", JOptionPane.INFORMATION_MESSAGE);
+                String role = RetriveRole.getRole(userID);
+                JOptionPane.showMessageDialog(btnUserLogin, "You have successfully logged in as " + role, "Login Successful", JOptionPane.INFORMATION_MESSAGE);
                 dispose();
             } else if (institutionID.equals("") || userID.equals("") || password.equals("") || captchaEnteredByUser.equals("")) {
                 JOptionPane.showMessageDialog(btnUserLogin, "One Or More Fields Are Empty", "Empty Fields", JOptionPane.WARNING_MESSAGE);
