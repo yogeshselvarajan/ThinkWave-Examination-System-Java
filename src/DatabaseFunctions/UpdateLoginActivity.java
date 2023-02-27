@@ -1,8 +1,5 @@
 package DatabaseFunctions;
 
-import javax.swing.*;
-import javax.swing.border.Border;
-import java.awt.*;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -13,7 +10,7 @@ public class UpdateLoginActivity {
 
     // function to update the login activity of the user in the database
 
-    public static void updateLoginActivity(String userId) {
+    public static String updateLoginActivity(int userId) {
         Calendar now = Calendar.getInstance();
         String labeltime;
         final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -37,9 +34,6 @@ public class UpdateLoginActivity {
         } catch (SQLException sqlException) {
             sqlException.printStackTrace();
         }
-    }
-
-    public static void main(String[] args) {
-        updateLoginActivity("1");
+        return labeltime;
     }
 }

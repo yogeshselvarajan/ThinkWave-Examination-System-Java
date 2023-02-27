@@ -1,7 +1,11 @@
 package Admin;
 
+import DatabaseFunctions.ConnectionDB;
 import DatabaseFunctions.QuestionPaper.RetrieveCourseID;
+import DatabaseFunctions.UpdateLoginActivity;
 import DateTime.DateTimePanel;
+import Mail.NewUserAddedNotifier;
+import SecureHash.PassBasedEnc;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
@@ -12,6 +16,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -22,11 +28,24 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Objects;
 import java.util.Properties;
+
+import static RegexChecks.CheckEmail.isValidEmail;
 
 public class AdminDashboard  extends JFrame
 {
     File selectedFile;
+    final static Connection connection;
+
+    static {
+        try {
+            connection = ConnectionDB.connect();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
             try {
@@ -65,6 +84,265 @@ public class AdminDashboard  extends JFrame
                 lblAddStudent.setBounds(120, 30, 150, 30);
                 panelright1.add(lblAddStudent);
                 lblAddStudent.setForeground(Color.BLACK);
+                // Add a mouse listener to the lblAddStudent label if pressed,
+                lblAddStudent.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        panelright1.setVisible(false);
+                        panelright2.setVisible(false);
+                        panelright3.setVisible(false);
+                        panelright4.setVisible(true);
+                        panelright1.removeAll();
+                        panelright2.removeAll();
+                        panelright3.removeAll();
+                        panelright4.removeAll();
+
+
+
+                        // Add a label to the panelright4 panel with the text "User ID"
+                        JLabel lblUserID = new JLabel("User ID:");
+                        lblUserID.setFont(new Font("Tahoma", Font.BOLD, 20));
+                        lblUserID.setBounds(50, 50, 100, 30);
+                        panelright4.add(lblUserID);
+                        lblUserID.setForeground(Color.BLACK);
+                        // Add a text field to the panelright4 panel with the text "User ID"
+                        JTextField txtUserID = new JTextField();
+                        txtUserID.setFont(new Font("Tahoma", Font.PLAIN, 20));
+                        txtUserID.setBounds(150, 50, 200, 30);
+                        panelright4.add(txtUserID);
+                        txtUserID.setForeground(Color.BLACK);
+                        // The text field must allow only 1-10000(for student), 10001-20000(for lecturer) and 20001-30000(for admin) numbers
+                        txtUserID.addKeyListener(new KeyAdapter() {
+                            @Override
+                            public void keyTyped(KeyEvent e) {
+                                char c = e.getKeyChar();
+                                if (!((c >= '0') && (c <= '9') ||
+                                        (c == KeyEvent.VK_BACK_SPACE) ||
+                                        (c == KeyEvent.VK_DELETE))) {
+                                    getToolkit().beep();
+                                    e.consume();
+                                }
+                            }
+                        });
+                        // Totally only 5 digits are allowed
+                        txtUserID.addKeyListener(new KeyAdapter() {
+                            @Override
+                            public void keyTyped(KeyEvent e) {
+                                if (txtUserID.getText().length() >= 5 ) // limit textfield to 3 characters
+                                    e.consume();
+                            }
+                        });
+
+                        // Add a label to the panelright4 panel with the text "Institution ID:" below the "User ID" label
+                        JLabel lblInstitutionID = new JLabel("Institution ID:");
+                        lblInstitutionID.setFont(new Font("Tahoma", Font.BOLD, 20));
+                        lblInstitutionID.setBounds(50, 100, 150, 30);
+                        panelright4.add(lblInstitutionID);
+                        lblInstitutionID.setForeground(Color.BLACK);
+                        // Add a text field to the panelright4 panel with the text "Institution ID:" below the "User ID" text field
+                        JTextField txtInstitutionID = new JTextField();
+                        txtInstitutionID.setFont(new Font("Tahoma", Font.PLAIN, 20));
+                        txtInstitutionID.setBounds(200, 100, 150, 30);
+                        panelright4.add(txtInstitutionID);
+                        txtInstitutionID.setForeground(Color.BLACK);
+                        txtInstitutionID.addKeyListener(new KeyAdapter() {
+                            @Override
+                            public void keyTyped(KeyEvent e) {
+                                char c = e.getKeyChar();
+                                if (txtInstitutionID.getText().length() >= 5 || (txtInstitutionID.getText().length() == 0 && c != 'I')) {
+                                    e.consume(); // ignore input if already 5 characters or first character is not "I"
+                                } else if (txtInstitutionID.getText().length() == 1 && c != 'N') {
+                                    e.consume(); // ignore input if second character is not "N"
+                                } else if (txtInstitutionID.getText().length() == 2 && c != 'S') {
+                                    e.consume(); // ignore input if third character is not "S"
+                                } else if (txtInstitutionID.getText().length() >= 3 && !Character.isDigit(c)) {
+                                    e.consume(); // ignore input if last two characters are not digits
+                                }
+                            }
+                        });
+
+                        // Add a label to the panelright4 panel with the text "Name:" below the "Institution ID" label
+                        JLabel lblName = new JLabel("Name:");
+                        lblName.setFont(new Font("Tahoma", Font.BOLD, 20));
+                        lblName.setBounds(50, 150, 100, 30);
+                        panelright4.add(lblName);
+                        lblName.setForeground(Color.BLACK);
+                        // Add a text field to the panelright4 panel with the text "Name:" below the "Institution ID" text field
+                        JTextField txtName = new JTextField();
+                        txtName.setFont(new Font("Tahoma", Font.PLAIN, 20));
+                        txtName.setBounds(200, 150, 150, 30);
+                        panelright4.add(txtName);
+                        txtName.setForeground(Color.BLACK);
+
+
+                        // Add a label to the panelright4 panel with the text "Mobile Number:" below the "Institution ID" label
+                        JLabel lblMobileNumber = new JLabel("Mobile Number:");
+                        lblMobileNumber.setFont(new Font("Tahoma", Font.BOLD, 16));
+                        lblMobileNumber.setBounds(50, 200, 150, 30);
+                        panelright4.add(lblMobileNumber);
+                        lblMobileNumber.setForeground(Color.BLACK);
+                        // Add a text field to the panelright4 panel with the text "Mobile Number:" below the "Institution ID" text field
+                        JTextField txtMobileNumber = new JTextField();
+                        txtMobileNumber.setFont(new Font("Tahoma", Font.PLAIN, 20));
+                        txtMobileNumber.setBounds(200, 200, 150, 30);
+                        panelright4.add(txtMobileNumber);
+                        txtMobileNumber.setForeground(Color.BLACK);
+
+                        // This code checks that the mobile number starts with "7", "8", or "9", and is exactly 10 digits long.
+                        // It also ensures that all characters are digits.
+                        // If the user tries to enter a character that violates any of these conditions, the event is consumed and the input is ignored.
+                        txtMobileNumber.addKeyListener(new KeyAdapter() {
+                            @Override
+                            public void keyTyped(KeyEvent e) {
+                                char c = e.getKeyChar();
+                                if (txtMobileNumber.getText().length() >= 10 || (txtMobileNumber.getText().length() == 0 && c != '7' && c != '8' && c != '9')) {
+                                    e.consume(); // ignore input if already 10 characters or first character is not "7", "8", or "9"
+                                } else if (txtMobileNumber.getText().length() >= 1 && !Character.isDigit(c)) {
+                                    e.consume(); // ignore input if last nine characters are not digits
+                                }
+                            }
+                        });
+
+                        // Add a label to the panelright4 panel with the text "Email:" below the "Mobile Number" label
+                        JLabel lblEmail = new JLabel("Email:");
+                        lblEmail.setFont(new Font("Tahoma", Font.BOLD, 20));
+                        lblEmail.setBounds(50, 250, 150, 30);
+                        panelright4.add(lblEmail);
+                        lblEmail.setForeground(Color.BLACK);
+                        // Add a text field to the panelright4 panel with the text "Email:" below the "Mobile Number" text field
+                        JTextField txtEmail = new JTextField();
+                        txtEmail.setFont(new Font("Tahoma", Font.PLAIN, 20));
+                        txtEmail.setBounds(200, 250, 150, 30);
+                        panelright4.add(txtEmail);
+                        txtEmail.setForeground(Color.BLACK);
+                       // Add a label with the text "Address" to the panelright4 panel  below the "Email" label
+                        JLabel lblAddress = new JLabel("Address:");
+                        lblAddress.setFont(new Font("Tahoma", Font.BOLD, 20));
+                        lblAddress.setBounds(450, 50, 150, 30);
+                        panelright4.add(lblAddress);
+                        lblAddress.setForeground(Color.BLACK);
+                        // Add a text area for the address to the panelright4 panel below the "Email" text field
+                        JTextArea txtAddress = new JTextArea();
+                        txtAddress.setFont(new Font("Tahoma", Font.PLAIN, 16));
+                        txtAddress.setBounds(550, 50, 380, 175);
+                        panelright4.add(txtAddress);
+                        txtAddress.setForeground(Color.BLACK);
+
+                        // Add a label with the text "Gender" to the panelright4 panel  below the "Address" label
+                        JLabel lblGender = new JLabel("Gender:");
+                        lblGender.setFont(new Font("Tahoma", Font.BOLD, 20));
+                        lblGender.setBounds(50, 300, 150, 30);
+                        panelright4.add(lblGender);
+                        lblGender.setForeground(Color.BLACK);
+                        JComboBox<String> cmbGender = new JComboBox<>();
+                        cmbGender.setFont(new Font("Tahoma", Font.PLAIN, 20));
+                        cmbGender.setBounds(200, 300, 150, 30);
+                        panelright4.add(cmbGender);
+                        cmbGender.setForeground(Color.BLACK);
+                        cmbGender.addItem("Choose");
+                        cmbGender.addItem("Male");
+                        cmbGender.addItem("Female");
+
+                        // Add a button with the text "Submit" to the panelright4 panel  below the "Address" label
+                        JButton btnSubmit = new JButton("Submit");
+                        btnSubmit.setFont(new Font("Tahoma", Font.BOLD, 20));
+                        btnSubmit.setBounds(500, 300, 150, 30);
+                        panelright4.add(btnSubmit);
+                        btnSubmit.setForeground(Color.BLACK);
+                        btnSubmit.addActionListener(e1 -> {
+                            // Get the values from the text fields and combo box and store them in variables
+                            int userID = Integer.parseInt(txtUserID.getText());
+                            String institutionID = txtInstitutionID.getText();
+                            String name = txtName.getText();
+                            String mobileNumber = txtMobileNumber.getText();
+                            String email = txtEmail.getText();
+                            String address = txtAddress.getText();
+                            String gender = (String) cmbGender.getSelectedItem();
+                            // Check if the gender is "Male", then set the gender as M and vice versa
+                            if (Objects.equals(gender, "Male"))
+                                gender = "M";
+                            else if  (Objects.equals(gender, "Female"))
+                                gender = "F";
+                           else
+                               JOptionPane.showMessageDialog(btnSubmit, "Please choose a gender!", "Error", JOptionPane.ERROR_MESSAGE);
+
+
+                            // Check if the values are not empty
+                              if (txtUserID.getText().isEmpty() || txtInstitutionID.getText().isEmpty() || txtName.getText().isEmpty() || txtMobileNumber.getText().isEmpty() || txtEmail.getText().isEmpty() || txtAddress.getText().isEmpty() || Objects.equals(cmbGender.getSelectedItem(), "Choose")) {
+                                    JOptionPane.showMessageDialog(btnSubmit, "Please fill in all the fields!", "Error", JOptionPane.ERROR_MESSAGE);
+                                }
+                            // Check if the email is valid
+                            else if (!isValidEmail(email)) {
+                                JOptionPane.showMessageDialog(btnSubmit, "Please enter a valid email address!", "Error", JOptionPane.ERROR_MESSAGE);
+                            }
+
+                           else {
+                                  // Add the student to the database
+                                  String queryforDetails = "INSERT INTO THINKWAVE.USER_DETAILS (USER_ID, INSTID, NAME, MOBILENUM, EMAIL, ADDRESS, GENDER) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                                  String queryforAuth = "INSERT INTO THINKWAVE.USER_AUTHENTICATION (USER_ID, LAST_LOGIN, PASSW_HASH, PASSW_SALT, INST_ID) VALUES (?, ?, ?, ?, ?)";
+                                  String Salt = PassBasedEnc.getSaltvalue(30);
+                                  String password = email.split("@")[0];
+                                  String hash = PassBasedEnc.generateSecurePassword(password, Salt);
+
+                                  try (connection;
+                                       PreparedStatement preparedStatement = connection.prepareStatement(queryforDetails)) {
+                                      preparedStatement.setInt(1, userID);
+                                      preparedStatement.setString(2, institutionID);
+                                      preparedStatement.setString(3, name);
+                                      preparedStatement.setString(4, mobileNumber);
+                                      preparedStatement.setString(5, email);
+                                      preparedStatement.setString(6, address);
+                                      preparedStatement.setString(7, gender);
+                                      preparedStatement.executeUpdate();
+                                      JOptionPane.showMessageDialog(btnSubmit, "User added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                                      txtUserID.setText("");
+                                      txtInstitutionID.setText("");
+                                      txtName.setText("");
+                                      txtMobileNumber.setText("");
+                                      txtEmail.setText("");
+                                      txtAddress.setText("");
+                                      cmbGender.setSelectedIndex(0);
+                                      connection.setAutoCommit(false);
+                                      connection.commit(); // commit the transaction
+                                      try (PreparedStatement preparedStatement2 = connection.prepareStatement(queryforAuth)) {
+                                          preparedStatement2.setInt(1, userID);
+                                          preparedStatement2.setString(2, UpdateLoginActivity.updateLoginActivity(userID));
+                                          preparedStatement2.setString(3, hash);
+                                          preparedStatement2.setString(4, Salt);
+                                          preparedStatement2.setString(5, institutionID);
+                                          NewUserAddedNotifier.sendnotification(email, String.valueOf(userID),password);
+                                          preparedStatement2.executeUpdate();
+
+                                      } catch (SQLException ignored) {
+                                      } catch (IOException ex) {
+                                          throw new RuntimeException(ex);
+                                      }
+                                  } catch (SQLException ignored) {
+                                          }
+                              }
+
+                        });
+
+                        // Add a button with the text "Reset" to the panelright4 panel  below the "Submit" button
+                        JButton btnReset = new JButton("Reset");
+                        btnReset.setFont(new Font("Tahoma", Font.BOLD, 20));
+                        btnReset.setBounds(700, 300, 150, 30);
+                        panelright4.add(btnReset);
+                        btnReset.setForeground(Color.BLACK);
+                        btnReset.addActionListener(e12 -> {
+                            txtUserID.setText("");
+                            txtInstitutionID.setText("");
+                            txtName.setText("");
+                            txtMobileNumber.setText("");
+                            txtEmail.setText("");
+                            txtAddress.setText("");
+                            cmbGender.setSelectedIndex(0);
+
+                        });
+
+                    }
+                });
+
 
                 // Add image to panelright2 panel
                 try {
@@ -292,13 +570,12 @@ public class AdminDashboard  extends JFrame
                             String insID = "INS01";
                             int courseID = RetrieveCourseID.getCourseID(txtCourseCode.getText());
                             int semester = Integer.parseInt(txtSemester.getText());
-                            String year = cmbYear.getSelectedItem().toString();
+                            String year = Objects.requireNonNull(cmbYear.getSelectedItem()).toString();
                             String examName = txtExamName.getText();
                             String examDate = datePicker.getJFormattedTextField().getText();
                             String fileName = txtFileName.getText();
 
-                                String jdbcDriver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-                                String dbUrl = "jdbc:sqlserver://thinkwaveappln.database.windows.net:1433;database=orcl;user=thinkwave@thinkwaveappln;password=Mepcocollege1@;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;";
+                        String dbUrl = "jdbc:sqlserver://thinkwaveappln.database.windows.net:1433;database=orcl;user=thinkwave@thinkwaveappln;password=Mepcocollege1@;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;";
                                 String sql = "INSERT INTO THINKWAVE.QB_Question (InstID, CourseID, Semester, Year, ExamTitle, ExamDate, FileName, QuestionPaperPDF) VALUES (?, ?, ?, ?, ?, CONVERT(VARCHAR, ?, 3), ?, ?)";
 
                                 try (Connection conn = DriverManager.getConnection(dbUrl);

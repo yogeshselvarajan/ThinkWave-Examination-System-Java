@@ -377,7 +377,7 @@ public class LoginPage extends JFrame {
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
-                UpdateLoginActivity.updateLoginActivity(userID);
+                UpdateLoginActivity.updateLoginActivity(Integer.parseInt(userID));
                 String role = RetriveRole.getRole(userID);
                 JOptionPane.showMessageDialog(btnUserLogin, "You have successfully logged in as " + role, "Login Successful", JOptionPane.INFORMATION_MESSAGE);
                 dispose();
