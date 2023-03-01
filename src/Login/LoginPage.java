@@ -1,16 +1,15 @@
 package Login;
 
+import Admin.AdminDashboard;
 import Captcha.ImageGenerator;
 import DatabaseFunctions.RetrieveEmailID;
+import DatabaseFunctions.RetriveRole;
 import DatabaseFunctions.UpdateLoginActivity;
 import DatabaseFunctions.UserLoginCheck;
 import DateTime.DateTimePanel;
-import Mail.LoginNotifier;
-import DatabaseFunctions.RetriveRole;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
@@ -22,10 +21,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serial;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.TimeZone;
+
+import static Mail.LoginNotifier.sendLoginNotification;
 
 
 public class LoginPage extends JFrame {
@@ -144,7 +141,7 @@ public class LoginPage extends JFrame {
         lblHome.setBounds(1050, 10, 100, 30);
         lblHome.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
         lblHome.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        // When mouse hovers 
+        // When mouse hovers
         paneltop2.add(lblHome);
 
         // A label with the "Any Queries" text to go to the contact us page
@@ -363,6 +360,8 @@ public class LoginPage extends JFrame {
         });
         btnUserLogin.addActionListener(e ->
         {
+            JOptionPane.showMessageDialog(btnUserLogin, "Please wait while we log you in", "Logging In", JOptionPane.INFORMATION_MESSAGE);
+
             String institutionID = String.valueOf(institutionIDField.getText());
             String userID = String.valueOf(userIDField.getText());
             String password = String.valueOf(passwordField.getPassword());
@@ -370,18 +369,9 @@ public class LoginPage extends JFrame {
 
             String email = RetrieveEmailID.retrieveEmail(userID);
 
-            if (UserLoginCheck.checkUserLogin(userID, institutionID, password, captchaFromImage, captchaEnteredByUser)) {
-                JOptionPane.showMessageDialog(btnUserLogin, "Please wait while we log you in", "Logging In", JOptionPane.INFORMATION_MESSAGE);
-                try {
-                    LoginNotifier.sendLoginNotification(email, userID);
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-                UpdateLoginActivity.updateLoginActivity(Integer.parseInt(userID));
-                String role = RetriveRole.getRole(userID);
-                JOptionPane.showMessageDialog(btnUserLogin, "You have successfully logged in as " + role, "Login Successful", JOptionPane.INFORMATION_MESSAGE);
-                dispose();
-            } else if (institutionID.equals("") || userID.equals("") || password.equals("") || captchaEnteredByUser.equals("")) {
+            String login_result = UserLoginCheck.checkUserLogin(userID, institutionID, password, captchaFromImage, captchaEnteredByUser);
+
+            if (institutionID.equals("") || userID.equals("") || password.equals("") || captchaEnteredByUser.equals("")) {
                 JOptionPane.showMessageDialog(btnUserLogin, "One Or More Fields Are Empty", "Empty Fields", JOptionPane.WARNING_MESSAGE);
                 if (institutionID.equals(""))
                     institutionIDField.requestFocus();
@@ -391,13 +381,51 @@ public class LoginPage extends JFrame {
                     passwordField.requestFocus();
                 else
                     enterCaptcha.requestFocus();
-            } else {
+            }
+            else if(login_result.equals("User not found"))
+            {
+                JOptionPane.showMessageDialog(btnUserLogin, "User not found!", "Login Failed", JOptionPane.ERROR_MESSAGE);
+                userIDField.setText("");
+                passwordField.setText("");
+                enterCaptcha.setText("");
+                userIDField.requestFocus();
+            }
+            else if(login_result.equals("Invalid Credentials")) {
                 JOptionPane.showMessageDialog(btnUserLogin, "Invalid username/password (or) Wrong Captcha text entered!", "Login Error", JOptionPane.ERROR_MESSAGE);
                 userIDField.setText("");
                 passwordField.setText("");
                 enterCaptcha.setText("");
                 userIDField.requestFocus();
             }
+            else
+            {
+                UpdateLoginActivity.updateLoginActivity(Integer.parseInt(userID));
+                String role = RetriveRole.getRole(userID);
+                try {
+                    sendLoginNotification(email, userID);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+                dispose();
+                EventQueue.invokeLater(() -> {
+                    try {
+                        /* if (role.equals("Admin")) {
+                            AdminDashboard frame = new AdminDashboard();
+                            frame.setVisible(true);
+                        } else if (role.equals("Faculty")) {
+                            InstitutionDashboard frame = new InstitutionDashboard();
+                            frame.setVisible(true);
+                        } else*/
+                        if (role.equals("Student")) {
+                            AdminDashboard.getUserName(login_result);
+                            AdminDashboard.main(null);
+                        }
+                    } catch (Exception exp1) {
+                        exp1.printStackTrace();
+                    }
+                });
+            }
+
         });
         loginpanel.add(btnUserLogin);
 
@@ -453,15 +481,15 @@ public class LoginPage extends JFrame {
         });
         lblNewUser.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                    EventQueue.invokeLater(() -> {
-                        try {
-                              RedirectSignUp frame = new RedirectSignUp();
-                              frame.setVisible(true);
-                        } catch (Exception exp1) {
-                            exp1.printStackTrace();
-                        }
-                    });
-                }
+                EventQueue.invokeLater(() -> {
+                    try {
+                        RedirectSignUp frame = new RedirectSignUp();
+                        frame.setVisible(true);
+                    } catch (Exception exp1) {
+                        exp1.printStackTrace();
+                    }
+                });
+            }
         });
         loginpanel.add(lblNewUser);
 

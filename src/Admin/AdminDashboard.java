@@ -38,6 +38,8 @@ public class AdminDashboard  extends JFrame
     File selectedFile;
     final static Connection connection;
 
+    static String gotUserName = null;
+
     static {
         try {
             connection = ConnectionDB.connect();
@@ -55,6 +57,10 @@ public class AdminDashboard  extends JFrame
                 e.printStackTrace();
             }
         });
+    }
+
+    public static void getUserName(String loginResult) {
+     gotUserName = loginResult;
     }
 
     public void addMouseListenerToLblStudents(JLabel lblStudents, JPanel panelright1, JPanel panelright2, JPanel panelright3, JPanel panelright4) {
@@ -215,7 +221,7 @@ public class AdminDashboard  extends JFrame
                         txtEmail.setBounds(200, 250, 150, 30);
                         panelright4.add(txtEmail);
                         txtEmail.setForeground(Color.BLACK);
-                       // Add a label with the text "Address" to the panelright4 panel  below the "Email" label
+                        // Add a label with the text "Address" to the panelright4 panel  below the "Email" label
                         JLabel lblAddress = new JLabel("Address:");
                         lblAddress.setFont(new Font("Tahoma", Font.BOLD, 20));
                         lblAddress.setBounds(450, 50, 150, 30);
@@ -263,63 +269,63 @@ public class AdminDashboard  extends JFrame
                                 gender = "M";
                             else if  (Objects.equals(gender, "Female"))
                                 gender = "F";
-                           else
-                               JOptionPane.showMessageDialog(btnSubmit, "Please choose a gender!", "Error", JOptionPane.ERROR_MESSAGE);
+                            else
+                                JOptionPane.showMessageDialog(btnSubmit, "Please choose a gender!", "Error", JOptionPane.ERROR_MESSAGE);
 
 
                             // Check if the values are not empty
-                              if (txtUserID.getText().isEmpty() || txtInstitutionID.getText().isEmpty() || txtName.getText().isEmpty() || txtMobileNumber.getText().isEmpty() || txtEmail.getText().isEmpty() || txtAddress.getText().isEmpty() || Objects.equals(cmbGender.getSelectedItem(), "Choose")) {
-                                    JOptionPane.showMessageDialog(btnSubmit, "Please fill in all the fields!", "Error", JOptionPane.ERROR_MESSAGE);
-                                }
+                            if (txtUserID.getText().isEmpty() || txtInstitutionID.getText().isEmpty() || txtName.getText().isEmpty() || txtMobileNumber.getText().isEmpty() || txtEmail.getText().isEmpty() || txtAddress.getText().isEmpty() || Objects.equals(cmbGender.getSelectedItem(), "Choose")) {
+                                JOptionPane.showMessageDialog(btnSubmit, "Please fill in all the fields!", "Error", JOptionPane.ERROR_MESSAGE);
+                            }
                             // Check if the email is valid
                             else if (!isValidEmail(email)) {
                                 JOptionPane.showMessageDialog(btnSubmit, "Please enter a valid email address!", "Error", JOptionPane.ERROR_MESSAGE);
                             }
 
-                           else {
-                                  // Add the student to the database
-                                  String queryforDetails = "INSERT INTO THINKWAVE.USER_DETAILS (USER_ID, INSTID, NAME, MOBILENUM, EMAIL, ADDRESS, GENDER) VALUES (?, ?, ?, ?, ?, ?, ?)";
-                                  String queryforAuth = "INSERT INTO THINKWAVE.USER_AUTHENTICATION (USER_ID, LAST_LOGIN, PASSW_HASH, PASSW_SALT, INST_ID) VALUES (?, ?, ?, ?, ?)";
-                                  String Salt = PassBasedEnc.getSaltvalue(30);
-                                  String password = email.split("@")[0];
-                                  String hash = PassBasedEnc.generateSecurePassword(password, Salt);
+                            else {
+                                // Add the student to the database
+                                String queryforDetails = "INSERT INTO THINKWAVE.USER_DETAILS (USER_ID, INSTID, NAME, MOBILENUM, EMAIL, ADDRESS, GENDER) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                                String queryforAuth = "INSERT INTO THINKWAVE.USER_AUTHENTICATION (USER_ID, LAST_LOGIN, PASSW_HASH, PASSW_SALT, INST_ID) VALUES (?, ?, ?, ?, ?)";
+                                String Salt = PassBasedEnc.getSaltvalue(30);
+                                String password = email.split("@")[0];
+                                String hash = PassBasedEnc.generateSecurePassword(password, Salt);
 
-                                  try (connection;
-                                       PreparedStatement preparedStatement = connection.prepareStatement(queryforDetails)) {
-                                      preparedStatement.setInt(1, userID);
-                                      preparedStatement.setString(2, institutionID);
-                                      preparedStatement.setString(3, name);
-                                      preparedStatement.setString(4, mobileNumber);
-                                      preparedStatement.setString(5, email);
-                                      preparedStatement.setString(6, address);
-                                      preparedStatement.setString(7, gender);
-                                      preparedStatement.executeUpdate();
-                                      JOptionPane.showMessageDialog(btnSubmit, "User added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                                      txtUserID.setText("");
-                                      txtInstitutionID.setText("");
-                                      txtName.setText("");
-                                      txtMobileNumber.setText("");
-                                      txtEmail.setText("");
-                                      txtAddress.setText("");
-                                      cmbGender.setSelectedIndex(0);
-                                      connection.setAutoCommit(false);
-                                      connection.commit(); // commit the transaction
-                                      try (PreparedStatement preparedStatement2 = connection.prepareStatement(queryforAuth)) {
-                                          preparedStatement2.setInt(1, userID);
-                                          preparedStatement2.setString(2, UpdateLoginActivity.updateLoginActivity(userID));
-                                          preparedStatement2.setString(3, hash);
-                                          preparedStatement2.setString(4, Salt);
-                                          preparedStatement2.setString(5, institutionID);
-                                          NewUserAddedNotifier.sendnotification(email, String.valueOf(userID),password);
-                                          preparedStatement2.executeUpdate();
+                                try (connection;
+                                     PreparedStatement preparedStatement = connection.prepareStatement(queryforDetails)) {
+                                    preparedStatement.setInt(1, userID);
+                                    preparedStatement.setString(2, institutionID);
+                                    preparedStatement.setString(3, name);
+                                    preparedStatement.setString(4, mobileNumber);
+                                    preparedStatement.setString(5, email);
+                                    preparedStatement.setString(6, address);
+                                    preparedStatement.setString(7, gender);
+                                    preparedStatement.executeUpdate();
+                                    JOptionPane.showMessageDialog(btnSubmit, "User added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                                    txtUserID.setText("");
+                                    txtInstitutionID.setText("");
+                                    txtName.setText("");
+                                    txtMobileNumber.setText("");
+                                    txtEmail.setText("");
+                                    txtAddress.setText("");
+                                    cmbGender.setSelectedIndex(0);
+                                    connection.setAutoCommit(false);
+                                    connection.commit(); // commit the transaction
+                                    try (PreparedStatement preparedStatement2 = connection.prepareStatement(queryforAuth)) {
+                                        preparedStatement2.setInt(1, userID);
+                                        preparedStatement2.setString(2, UpdateLoginActivity.updateLoginActivity(userID));
+                                        preparedStatement2.setString(3, hash);
+                                        preparedStatement2.setString(4, Salt);
+                                        preparedStatement2.setString(5, institutionID);
+                                        NewUserAddedNotifier.sendnotification(email, String.valueOf(userID),password);
+                                        preparedStatement2.executeUpdate();
 
-                                      } catch (SQLException ignored) {
-                                      } catch (IOException ex) {
-                                          throw new RuntimeException(ex);
-                                      }
-                                  } catch (SQLException ignored) {
-                                          }
-                              }
+                                    } catch (SQLException ignored) {
+                                    } catch (IOException ex) {
+                                        throw new RuntimeException(ex);
+                                    }
+                                } catch (SQLException ignored) {
+                                }
+                            }
 
                         });
 
@@ -552,7 +558,7 @@ public class AdminDashboard  extends JFrame
                             selectedFile = fileChooser.getSelectedFile();
                             if (!selectedFile.getName().toLowerCase().endsWith(".pdf"))
                                 JOptionPane.showMessageDialog(panelright4, "Please select a PDF file");
-                             else
+                            else
                                 txtFileName.setText(selectedFile.getName().substring(selectedFile.getName().lastIndexOf("\\") + 1));
                         }
                     }
@@ -566,46 +572,46 @@ public class AdminDashboard  extends JFrame
                 btnUploadQuestionPaper.addActionListener(e2 ->
                 {
                     {
-                            // Get the input from the text fields and store them in variables
-                            String insID = "INS01";
-                            int courseID = RetrieveCourseID.getCourseID(txtCourseCode.getText());
-                            int semester = Integer.parseInt(txtSemester.getText());
-                            String year = Objects.requireNonNull(cmbYear.getSelectedItem()).toString();
-                            String examName = txtExamName.getText();
-                            String examDate = datePicker.getJFormattedTextField().getText();
-                            String fileName = txtFileName.getText();
+                        // Get the input from the text fields and store them in variables
+                        String insID = "INS01";
+                        int courseID = RetrieveCourseID.getCourseID(txtCourseCode.getText());
+                        int semester = Integer.parseInt(txtSemester.getText());
+                        String year = Objects.requireNonNull(cmbYear.getSelectedItem()).toString();
+                        String examName = txtExamName.getText();
+                        String examDate = datePicker.getJFormattedTextField().getText();
+                        String fileName = txtFileName.getText();
 
                         String dbUrl = "jdbc:sqlserver://thinkwaveappln.database.windows.net:1433;database=orcl;user=thinkwave@thinkwaveappln;password=Mepcocollege1@;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;";
-                                String sql = "INSERT INTO THINKWAVE.QB_Question (InstID, CourseID, Semester, Year, ExamTitle, ExamDate, FileName, QuestionPaperPDF) VALUES (?, ?, ?, ?, ?, CONVERT(VARCHAR, ?, 3), ?, ?)";
+                        String sql = "INSERT INTO THINKWAVE.QB_Question (InstID, CourseID, Semester, Year, ExamTitle, ExamDate, FileName, QuestionPaperPDF) VALUES (?, ?, ?, ?, ?, CONVERT(VARCHAR, ?, 3), ?, ?)";
 
-                                try (Connection conn = DriverManager.getConnection(dbUrl);
-                                     PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                                    pstmt.setString(1, insID);
-                                    pstmt.setInt(2, courseID);
-                                    pstmt.setInt(3, semester);
-                                    pstmt.setString(4, year);
-                                    pstmt.setString(5, examName);
-                                    pstmt.setString(6, examDate);
-                                    pstmt.setString(7, fileName);
-                                    FileInputStream fis = new FileInputStream(selectedFile);
-                                    pstmt.setBinaryStream(8, fis, (int) selectedFile.length());
-                                    int rowsAffected = pstmt.executeUpdate();
-                                    if (rowsAffected > 0) {
-                                        txtCourseCode.setText("");
-                                        txtSemester.setText("");
-                                        cmbYear.setSelectedIndex(0);
-                                        txtExamName.setText("");
-                                        datePicker.getJFormattedTextField().setText("");
-                                        txtFileName.setText("");
-                                        JOptionPane.showMessageDialog(btnUploadQuestionPaper, "Question paper uploaded successfully!");
-                                    }
-                                } catch (SQLException | FileNotFoundException ex) {
-                                    throw new RuntimeException(ex);
-                                }
+                        try (Connection conn = DriverManager.getConnection(dbUrl);
+                             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                            pstmt.setString(1, insID);
+                            pstmt.setInt(2, courseID);
+                            pstmt.setInt(3, semester);
+                            pstmt.setString(4, year);
+                            pstmt.setString(5, examName);
+                            pstmt.setString(6, examDate);
+                            pstmt.setString(7, fileName);
+                            FileInputStream fis = new FileInputStream(selectedFile);
+                            pstmt.setBinaryStream(8, fis, (int) selectedFile.length());
+                            int rowsAffected = pstmt.executeUpdate();
+                            if (rowsAffected > 0) {
+                                txtCourseCode.setText("");
+                                txtSemester.setText("");
+                                cmbYear.setSelectedIndex(0);
+                                txtExamName.setText("");
+                                datePicker.getJFormattedTextField().setText("");
+                                txtFileName.setText("");
+                                JOptionPane.showMessageDialog(btnUploadQuestionPaper, "Question paper uploaded successfully!");
                             }
+                        } catch (SQLException | FileNotFoundException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }
                 });
             }
-            });
+        });
     }
 
 
@@ -623,17 +629,17 @@ public class AdminDashboard  extends JFrame
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Adding the title image of the page to the frame
-            JLabel image = new JLabel(new ImageIcon(ImageIO.read(new File("img/Login/thinkwave.png"))));
-            image.setBounds(5, 10, 1400, 100);
-            contentPane.add(image);
+        JLabel image = new JLabel(new ImageIcon(ImageIO.read(new File("img/Login/thinkwave.png"))));
+        image.setBounds(5, 10, 1400, 100);
+        contentPane.add(image);
 
-            JLabel image1 = new JLabel(new ImageIcon(ImageIO.read(new File("img/Admin/slogan.png"))));
-            image1.setBounds(200, 125, 1100, 50);
-            contentPane.add(image1);
+        JLabel image1 = new JLabel(new ImageIcon(ImageIO.read(new File("img/Admin/slogan.png"))));
+        image1.setBounds(200, 125, 1100, 50);
+        contentPane.add(image1);
 
-            JLabel image2 = new JLabel(new ImageIcon(ImageIO.read(new File("img/Admin/admin dashboard.png"))));
-            image2.setBounds(155, 185, 1200, 50);
-            contentPane.add(image2);
+        JLabel image2 = new JLabel(new ImageIcon(ImageIO.read(new File("img/Admin/admin dashboard.png"))));
+        image2.setBounds(155, 185, 1200, 50);
+        contentPane.add(image2);
 
            /* JLabel image3 = new JLabel(new ImageIcon(ImageIO.read(new File("./img/Admin/admin ui.jpg"))));
             image3.setBounds(15, 235, 600, 500);
@@ -655,7 +661,7 @@ public class AdminDashboard  extends JFrame
         paneltop2.setLayout(null);
         contentPane.add(paneltop2);
 
-        // A panel below the paneltop2 panel at the left side of the frame to act as a sidebar
+        // A panel below the paneltop2 panel on the left side of the frame to act as a sidebar
         JPanel panelleft = new JPanel();
         panelleft.setBounds(2, 245, 250, 485);
         // Set colour to panel background to  light grey
@@ -669,6 +675,15 @@ public class AdminDashboard  extends JFrame
         lblLogo.setBounds(50, 50, 150, 50);
         panelleft.add(lblLogo);
 
+
+       /* else
+        {
+            JLabel lblWelcome = new JLabel("User not got");
+            lblWelcome.setFont(new Font("Tahoma", Font.BOLD, 20));
+            lblWelcome.setBounds(50, 100, 200, 30);
+            panelleft.add(lblWelcome);
+            lblWelcome.setForeground(Color.BLACK);
+        }*/
         // Add the text Home to the panelleft panel
         JLabel lblHome = new JLabel("Home");
         lblHome.setFont(new Font("Tahoma", Font.BOLD, 20));
@@ -727,6 +742,27 @@ public class AdminDashboard  extends JFrame
         panelright.setLayout(null);
         contentPane.add(panelright);
         panelright.setVisible(true);
+
+        // Add the test <Welcome, username>
+        JLabel lblWelcome = new JLabel("You are logged in as: " + gotUserName);
+        lblWelcome.setFont(new Font("Tahoma", Font.BOLD, 20));
+        lblWelcome.setBounds(700, 10, 500, 30);
+        panelright.add(lblWelcome);
+        lblWelcome.setForeground(Color.YELLOW);
+
+        String message = "<html><div style='text-align: center;'><p style='margin-bottom: 20px;'>Welcome to the ThinkWave MCQ Examination System Dashboard, esteemed Administrator!</p>"
+                + "<p style='margin-bottom: 20px;'>Here, you can manage all aspects of the system, from the Students Menu to the Faculty Menu, and everything in between. "
+                + "With just a few clicks, you can create, edit, or delete users, upload PDFs of the question bank, and much more.</p>"
+                + "<p style='margin-bottom: 20px;'>As an administrator, you play a vital role in ensuring the smooth functioning of the system, and we are confident that you will do an excellent job in fulfilling your duties.</p>"
+                + "<p style='margin-bottom: 20px;'>Should you encounter any issues while using the system, please do not hesitate to raise a ticket from within the system, and our developers will be happy to assist you in resolving any issues that you may encounter.</p>"
+                + "<p>Thank you for using the ThinkWave MCQ Examination System, and we hope that you have a productive day ahead!</p></div></html>";
+        JLabel messageLabel = new JLabel(message);
+        messageLabel.setFont(new Font("Serif", Font.BOLD, 19));
+        messageLabel.setBounds(50, 50, 1000, 400);
+        panelright.add(messageLabel);
+        messageLabel.setForeground(Color.WHITE);
+
+
 
         // A panel inside the panelright panel to display the content
         JPanel panelright1 = new JPanel();
