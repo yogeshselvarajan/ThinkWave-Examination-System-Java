@@ -2,8 +2,10 @@ package Admin;
 
 import DatabaseFunctions.ConnectionDB;
 import DatabaseFunctions.QuestionPaper.RetrieveCourseID;
+import DatabaseFunctions.RetriveUserName;
 import DatabaseFunctions.UpdateLoginActivity;
 import DateTime.DateTimePanel;
+import Login.LoginPage;
 import Mail.NewUserAddedNotifier;
 import SecureHash.PassBasedEnc;
 import org.jdatepicker.impl.JDatePanelImpl;
@@ -20,6 +22,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.font.TextAttribute;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -28,6 +31,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -38,7 +42,7 @@ public class AdminDashboard  extends JFrame
     File selectedFile;
     final static Connection connection;
 
-    static String gotUserName = null;
+    static String gotUserID = null;
 
     static {
         try {
@@ -59,11 +63,25 @@ public class AdminDashboard  extends JFrame
         });
     }
 
-    public static void getUserName(String loginResult) {
-     gotUserName = loginResult;
+    public static void getUserIDFromLogin(String passedid) {
+     gotUserID = passedid;
     }
 
-    public void addMouseListenerToLblStudents(JLabel lblStudents, JPanel panelright1, JPanel panelright2, JPanel panelright3, JPanel panelright4) {
+    private void removeWelcomeMessage(JPanel panelright) {
+        Component[] components = panelright.getComponents();
+        for (Component component : components) {
+            if (component instanceof JLabel) {
+                JLabel label = (JLabel) component;
+                if (label.getText().contains("Welcome to the ThinkWave MCQ Examination System Dashboard")) {
+                    panelright.remove(label);
+                    panelright.repaint();
+                    break;
+                }
+            }
+        }
+    }
+
+    public void addMouseListenerToLblStudents(JLabel lblStudents, JPanel panelright1, JPanel panelright2, JPanel panelright3, JPanel panelright4,JPanel panelright){
         lblStudents.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -71,11 +89,14 @@ public class AdminDashboard  extends JFrame
                 panelright2.setVisible(true);
                 panelright3.setVisible(true);
                 panelright4.setVisible(false);
+                
 
                 // Reset content of panels
+                removeWelcomeMessage(panelright);
                 panelright1.removeAll();
                 panelright2.removeAll();
                 panelright3.removeAll();
+
 
                 // Add image to panelright1 panel
                 try {
@@ -386,7 +407,7 @@ public class AdminDashboard  extends JFrame
         });
     }
 
-    public void addMouseListenerToLblTeachers(JLabel lblTeachers, JPanel panelright1, JPanel panelright2, JPanel panelright3, JPanel panelright4) {
+    public void addMouseListenerToLblTeachers(JLabel lblTeachers, JPanel panelright1, JPanel panelright2, JPanel panelright3, JPanel panelright4, JPanel panelright) {
         lblTeachers.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -396,6 +417,7 @@ public class AdminDashboard  extends JFrame
                 panelright4.setVisible(false);
 
                 // Reset content of panels
+                removeWelcomeMessage(panelright);
                 panelright1.removeAll();
                 panelright2.removeAll();
                 panelright3.removeAll();
@@ -615,6 +637,39 @@ public class AdminDashboard  extends JFrame
     }
 
 
+    private void addWelcomeMessage(JPanel panelright) {
+        String message = "<html><div style='text-align: center;'><p style='margin-bottom: 20px;'>Welcome to the ThinkWave MCQ Examination System Dashboard, esteemed Administrator!</p>"
+                + "<p style='margin-bottom: 20px;'>Here, you can manage all aspects of the system, from the Students Menu to the Faculty Menu, and everything in between. "
+                + "With just a few clicks, you can create, edit, or delete users, upload PDFs of the question bank, and much more.</p>"
+                + "<p style='margin-bottom: 20px;'>As an administrator, you play a vital role in ensuring the smooth functioning of the system, and we are confident that you will do an excellent job in fulfilling your duties.</p>"
+                + "<p style='margin-bottom: 20px;'>Should you encounter any issues while using the system, please do not hesitate to raise a ticket from within the system, and our developers will be happy to assist you in resolving any issues that you may encounter.</p>"
+                + "<p>Thank you for using the ThinkWave MCQ Examination System, and we hope that you have a productive day ahead!</p></div></html>";
+        JLabel messageLabel = new JLabel(message);
+        messageLabel.setFont(new Font("Serif", Font.BOLD, 19));
+        messageLabel.setBounds(50, 50, 1000, 400);
+        panelright.add(messageLabel);
+        messageLabel.setForeground(Color.WHITE);
+        panelright.repaint();
+    }
+
+
+    private void nullifySessionID(String userID) {
+        String updateSql = "UPDATE THINKWAVE.USER_DETAILS SET SESSIONID = NULL WHERE USER_ID = ?";
+        try {
+            Connection con = ConnectionDB.connect();
+            PreparedStatement ps = con.prepareStatement(updateSql);
+            ps.setString(1, userID);
+            ps.executeUpdate();
+            con.setAutoCommit(false);
+            con.commit();
+            ps.close();
+            con.close();
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+        }
+    }
+
+
     public AdminDashboard() throws IOException
     {
         setResizable(false);
@@ -688,6 +743,25 @@ public class AdminDashboard  extends JFrame
         JLabel lblHome = new JLabel("Home");
         lblHome.setFont(new Font("Tahoma", Font.BOLD, 20));
         lblHome.setBounds(80, 150, 100, 30);
+        lblHome.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                Font font = lblHome.getFont();
+                Map attributes = font.getAttributes();
+                attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+                lblHome.setFont(font.deriveFont(attributes));
+                lblHome.setForeground(Color.BLUE);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                Font font = lblHome.getFont();
+                Map attributes = font.getAttributes();
+                attributes.put(TextAttribute.UNDERLINE, -1);
+                lblHome.setFont(font.deriveFont(attributes));
+                lblHome.setForeground(Color.BLACK);
+            }
+        });
         panelleft.add(lblHome);
         lblHome.setForeground(Color.BLACK);
 
@@ -696,12 +770,50 @@ public class AdminDashboard  extends JFrame
         lblStudents.setFont(new Font("Tahoma", Font.BOLD, 20));
         lblStudents.setBounds(80, 200, 100, 30);
         panelleft.add(lblStudents);
+        lblStudents.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                Font font = lblStudents.getFont();
+                Map attributes = font.getAttributes();
+                attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+                lblStudents.setFont(font.deriveFont(attributes));
+                lblStudents.setForeground(Color.BLUE);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                Font font = lblStudents.getFont();
+                Map attributes = font.getAttributes();
+                attributes.put(TextAttribute.UNDERLINE, -1);
+                lblStudents.setFont(font.deriveFont(attributes));
+                lblStudents.setForeground(Color.BLACK);
+            }
+        });
         lblStudents.setForeground(Color.BLACK);
 
         // Add the text Teachers to the panelleft panel blow the Students text
         JLabel lblTeachers = new JLabel("Teachers");
         lblTeachers.setFont(new Font("Tahoma", Font.BOLD, 20));
         lblTeachers.setBounds(80, 250, 100, 30);
+        lblTeachers.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                Font font = lblTeachers.getFont();
+                Map attributes = font.getAttributes();
+                attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+                lblTeachers.setFont(font.deriveFont(attributes));
+                lblTeachers.setForeground(Color.BLUE);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                Font font = lblTeachers.getFont();
+                Map attributes = font.getAttributes();
+                attributes.put(TextAttribute.UNDERLINE, -1);
+                lblTeachers.setFont(font.deriveFont(attributes));
+                lblTeachers.setForeground(Color.BLACK);
+            }
+        });
         panelleft.add(lblTeachers);
         lblTeachers.setForeground(Color.BLACK);
 
@@ -709,13 +821,51 @@ public class AdminDashboard  extends JFrame
         JLabel lblExams = new JLabel("Exams");
         lblExams.setFont(new Font("Tahoma", Font.BOLD, 20));
         lblExams.setBounds(80, 300, 100, 30);
+        lblExams.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                Font font = lblExams.getFont();
+                Map attributes = font.getAttributes();
+                attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+                lblExams.setFont(font.deriveFont(attributes));
+                lblExams.setForeground(Color.BLUE);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                Font font = lblExams.getFont();
+                Map attributes = font.getAttributes();
+                attributes.put(TextAttribute.UNDERLINE, -1);
+                lblExams.setFont(font.deriveFont(attributes));
+                lblExams.setForeground(Color.BLACK);
+            }
+        });
         panelleft.add(lblExams);
         lblExams.setForeground(Color.BLACK);
 
         // Add the text Question Papers to the panelleft panel blow the Exams text
-        JLabel lblQuestionPapers = new JLabel("Question Papers");
+        JLabel lblQuestionPapers = new JLabel("Question Bank");
         lblQuestionPapers.setFont(new Font("Tahoma", Font.BOLD, 20));
         lblQuestionPapers.setBounds(40, 350, 200, 30);
+        lblQuestionPapers.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                Font font = lblQuestionPapers.getFont();
+                Map attributes = font.getAttributes();
+                attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+                lblQuestionPapers.setFont(font.deriveFont(attributes));
+                lblQuestionPapers.setForeground(Color.BLUE);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                Font font = lblQuestionPapers.getFont();
+                Map attributes = font.getAttributes();
+                attributes.put(TextAttribute.UNDERLINE, -1);
+                lblQuestionPapers.setFont(font.deriveFont(attributes));
+                lblQuestionPapers.setForeground(Color.BLACK);
+            }
+        });
         panelleft.add(lblQuestionPapers);
         lblQuestionPapers.setForeground(Color.BLACK);
 
@@ -724,13 +874,68 @@ public class AdminDashboard  extends JFrame
         lblSettings.setFont(new Font("Tahoma", Font.BOLD, 20));
         lblSettings.setBounds(80, 400, 100, 30);
         panelleft.add(lblSettings);
+        lblSettings.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                Font font = lblSettings.getFont();
+                Map attributes = font.getAttributes();
+                attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+                lblSettings.setFont(font.deriveFont(attributes));
+                lblSettings.setForeground(Color.BLUE);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                Font font = lblSettings.getFont();
+                Map attributes = font.getAttributes();
+                attributes.put(TextAttribute.UNDERLINE, -1);
+                lblSettings.setFont(font.deriveFont(attributes));
+                lblSettings.setForeground(Color.BLACK);
+            }
+        });
         lblSettings.setForeground(Color.BLACK);
 
         // Add the text Logout to the panelleft panel blow the Settings text
         JLabel lblLogout = new JLabel("Logout");
         lblLogout.setFont(new Font("Tahoma", Font.BOLD, 20));
         lblLogout.setBounds(80, 450, 100, 30);
+        lblLogout.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        lblLogout.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                Font font = lblLogout.getFont();
+                Map attributes = font.getAttributes();
+                attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+                lblLogout.setFont(font.deriveFont(attributes));
+                lblLogout.setForeground(Color.BLUE);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                Font font = lblLogout.getFont();
+                Map attributes = font.getAttributes();
+                attributes.put(TextAttribute.UNDERLINE, -1);
+                lblLogout.setFont(font.deriveFont(attributes));
+                lblLogout.setForeground(Color.BLACK);
+            }
+        });
         panelleft.add(lblLogout);
+        // When the user clicks on the logout text, the user is logged out and the login page is displayed
+        lblLogout.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                String message = "<html><body style='width: 300px; font-size: 14px;'>" +
+                        "<p style='margin-top: 10px;'>Logging out will <span style='color: red;'>end the current session</span> assigned.</p>" +
+                        "<p style='margin-bottom: 10px;'><br>Are you sure?</p>" +
+                        "</body></html>";
+                int option = JOptionPane.showConfirmDialog(getContentPane(), message, "Application Message", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (option == JOptionPane.YES_OPTION) {
+                    nullifySessionID(gotUserID);
+                    dispose();
+                    LoginPage.main(null);
+                }
+            }
+        });
         lblLogout.setForeground(Color.BLACK);
 
         // A panel to the right of the panelleft panel to display the content when the user clicks on the sidebar options
@@ -743,30 +948,18 @@ public class AdminDashboard  extends JFrame
         contentPane.add(panelright);
         panelright.setVisible(true);
 
-        // Add the test <Welcome, username>
-        JLabel lblWelcome = new JLabel("You are logged in as: " + gotUserName);
+        JLabel lblWelcome = new JLabel("You are logged in as: " + RetriveUserName.getUserName(gotUserID));
         lblWelcome.setFont(new Font("Tahoma", Font.BOLD, 20));
         lblWelcome.setBounds(700, 10, 500, 30);
         panelright.add(lblWelcome);
         lblWelcome.setForeground(Color.YELLOW);
 
-        String message = "<html><div style='text-align: center;'><p style='margin-bottom: 20px;'>Welcome to the ThinkWave MCQ Examination System Dashboard, esteemed Administrator!</p>"
-                + "<p style='margin-bottom: 20px;'>Here, you can manage all aspects of the system, from the Students Menu to the Faculty Menu, and everything in between. "
-                + "With just a few clicks, you can create, edit, or delete users, upload PDFs of the question bank, and much more.</p>"
-                + "<p style='margin-bottom: 20px;'>As an administrator, you play a vital role in ensuring the smooth functioning of the system, and we are confident that you will do an excellent job in fulfilling your duties.</p>"
-                + "<p style='margin-bottom: 20px;'>Should you encounter any issues while using the system, please do not hesitate to raise a ticket from within the system, and our developers will be happy to assist you in resolving any issues that you may encounter.</p>"
-                + "<p>Thank you for using the ThinkWave MCQ Examination System, and we hope that you have a productive day ahead!</p></div></html>";
-        JLabel messageLabel = new JLabel(message);
-        messageLabel.setFont(new Font("Serif", Font.BOLD, 19));
-        messageLabel.setBounds(50, 50, 1000, 400);
-        panelright.add(messageLabel);
-        messageLabel.setForeground(Color.WHITE);
-
-
+        // Display the Welcome text for the admin.
+        addWelcomeMessage(panelright);
 
         // A panel inside the panelright panel to display the content
         JPanel panelright1 = new JPanel();
-        panelright1.setBounds(65, 10, 300, 100);
+        panelright1.setBounds(65, 55, 300, 100);
         // Set colour to panel background to  yellow
         panelright1.setBackground(Color.YELLOW);
         panelright1.setBorder(new LineBorder(Color.BLACK, 2));
@@ -776,7 +969,7 @@ public class AdminDashboard  extends JFrame
 
         // A panel inside the panelright panel on the right side to panelright1 panel to display the content
         JPanel panelright2 = new JPanel();
-        panelright2.setBounds(425, 10, 300, 100);
+        panelright2.setBounds(425, 55, 300, 100);
         // Set colour to panel background to  yellow
         panelright2.setBackground(Color.YELLOW);
         panelright2.setBorder(new LineBorder(Color.BLACK, 2));
@@ -786,7 +979,7 @@ public class AdminDashboard  extends JFrame
 
         // A panel inside the panelright panel on the right side to panelright2 panel to display the content
         JPanel panelright3 = new JPanel();
-        panelright3.setBounds(790, 10, 300, 100);
+        panelright3.setBounds(790, 55, 300, 100);
         // Set colour to panel background to  yellow
         panelright3.setBackground(Color.YELLOW);
         panelright3.setBorder(new LineBorder(Color.BLACK, 2));
@@ -805,13 +998,11 @@ public class AdminDashboard  extends JFrame
         panelright.add(panelright4);
 
         // Performs an action when the user clicks on the Students text
-        addMouseListenerToLblStudents(lblStudents, panelright1, panelright2, panelright3, panelright4);
+        addMouseListenerToLblStudents(lblStudents, panelright1, panelright2, panelright3, panelright4, panelright);
         // Performs an action when the user clicks on the Teachers text
-        addMouseListenerToLblTeachers(lblTeachers, panelright1, panelright2, panelright3, panelright4);
+        addMouseListenerToLblTeachers(lblTeachers, panelright1, panelright2, panelright3, panelright4, panelright);
         // Performs an action when the user clicks on the Question Papers text
         setupQuestionPapersPanel(lblQuestionPapers, panelright1, panelright2, panelright3, panelright4, panelright);
-
-
 
         // import the addTimeFooter method from the DateTimePanel class
         DateTimePanel dateTimePanel = new DateTimePanel();

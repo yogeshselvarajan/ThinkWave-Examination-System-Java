@@ -68,14 +68,4 @@ public class PassBasedEnc {
 
         return finalval;
     }
-
-    public static void main(String[] args) {
-        String password = "DfayB)=";
-        String salt = "ugJUCYuy6aUAxFRK2r6Iswqasn6k34";
-        String securePassword = "oRzWiG6ENsf3LZmRiumcrt2wKEgZmjjilQ0tgK+Hphc=";
-        System.out.println("Password: " + password);
-        System.out.println("Salt: " + salt);
-        System.out.println("Secure Password: " + securePassword);
-        System.out.println("Verify Password: " + verifyUserPassword(password, securePassword, salt));
-    }
 }

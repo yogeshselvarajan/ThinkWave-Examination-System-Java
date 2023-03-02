@@ -12,6 +12,9 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -70,7 +73,7 @@ public class LoginPage extends JFrame {
         contentPane.setLayout(null);
         contentPane.setBackground(Color.LIGHT_GRAY);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setUndecorated(true);
+        setUndecorated(false);
         setAlwaysOnTop(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -206,7 +209,7 @@ public class LoginPage extends JFrame {
         institutionIDField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-                if (institutionIDField.getText().length() >= 7) // limit textfield to 5 characters
+                if (institutionIDField.getText().length() >= 5) // limit textfield to 5 characters
                     e.consume();
             }
         });
@@ -264,6 +267,26 @@ public class LoginPage extends JFrame {
         // Add border around the image icon
         showPassword.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         loginpanel.add(showPassword);
+
+        // A image icon to indicate Caps Lock if the field has Caps Lock on
+        ImageIcon capsLockIcon = new ImageIcon("./img/Login/capslock.png");
+        JLabel capsLock = new JLabel(capsLockIcon);
+        capsLock.setBounds(520, 205, 35, 35);
+        capsLock.setVisible(false);
+        loginpanel.add(capsLock);
+
+
+
+// Add a key listener to detect when caps lock is on
+        passwordField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_CAPS_LOCK))
+                    capsLock.setVisible(true);
+                else
+                    capsLock.setVisible(false);
+            }
+        });
 
         JLabel lblForgetPassword = new JLabel("Forgot Password? Click here");
         lblForgetPassword.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -345,12 +368,12 @@ public class LoginPage extends JFrame {
         btnUserLogin.setForeground(new Color(174, 34, 34));
         btnUserLogin.setBackground(new Color(255, 192, 203));
         btnUserLogin.setBounds(400, 355, 105, 35);
-        btnUserLogin.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnUserLogin.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
         // Set a green border around the button when the mouse hovers over it and remove it when the mouse exits
         btnUserLogin.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
+                btnUserLogin.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 btnUserLogin.setBorder(BorderFactory.createLineBorder(Color.GREEN, 3));
             }
             @Override
@@ -360,7 +383,7 @@ public class LoginPage extends JFrame {
         });
         btnUserLogin.addActionListener(e ->
         {
-            JOptionPane.showMessageDialog(btnUserLogin, "Please wait while we log you in", "Logging In", JOptionPane.INFORMATION_MESSAGE);
+            getContentPane().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); // change cursor to loading icon
 
             String institutionID = String.valueOf(institutionIDField.getText());
             String userID = String.valueOf(userIDField.getText());
@@ -372,6 +395,7 @@ public class LoginPage extends JFrame {
             String login_result = UserLoginCheck.checkUserLogin(userID, institutionID, password, captchaFromImage, captchaEnteredByUser);
 
             if (institutionID.equals("") || userID.equals("") || password.equals("") || captchaEnteredByUser.equals("")) {
+                getContentPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR)); // change cursor to default icon
                 JOptionPane.showMessageDialog(btnUserLogin, "One Or More Fields Are Empty", "Empty Fields", JOptionPane.WARNING_MESSAGE);
                 if (institutionID.equals(""))
                     institutionIDField.requestFocus();
@@ -382,19 +406,42 @@ public class LoginPage extends JFrame {
                 else
                     enterCaptcha.requestFocus();
             }
+            else if (login_result.equals("Already a session active"))
+            {String prompt_message = "<html><body>" +
+                    "<p style='font-size:12pt;font-weight:bold;'>Login Failed</p>" +
+                    "<p>Sorry, you cannot log in at this time as there is already an active session for your user " +
+                    "account. Our system allows only one active session per user at a time.</p>" +
+                    "<p>Please logout from the existing session before attempting to log in again. </p>" +
+                    "<p>Thank you for your understanding.</p>" +
+                    "<br>" +
+                    "<p>If the active session currently present is not initiated by you, " +
+                    "please raise a ticket through the application immediately to secure your account.</p>" +
+                    "<p style='color:red;font-weight:bold;'>IMPORTANT: Do not share your login credentials with anyone " +
+                    "and always log out from your account when you are done. </p>" +
+                    "</body></html>";
+                JOptionPane.showMessageDialog(btnUserLogin,prompt_message, "Login Failed", JOptionPane.ERROR_MESSAGE);
+                getContentPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR)); // change cursor to default icon
+                userIDField.setText("");
+                passwordField.setText("");
+                enterCaptcha.setText("Enter Captcha Text");
+                userIDField.requestFocus();
+
+            }
             else if(login_result.equals("User not found"))
             {
+                getContentPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR)); // change cursor to default icon
                 JOptionPane.showMessageDialog(btnUserLogin, "User not found!", "Login Failed", JOptionPane.ERROR_MESSAGE);
                 userIDField.setText("");
                 passwordField.setText("");
-                enterCaptcha.setText("");
+                enterCaptcha.setText("Enter Captcha Text");
                 userIDField.requestFocus();
             }
             else if(login_result.equals("Invalid Credentials")) {
                 JOptionPane.showMessageDialog(btnUserLogin, "Invalid username/password (or) Wrong Captcha text entered!", "Login Error", JOptionPane.ERROR_MESSAGE);
+                getContentPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR)); // change cursor to default icon
                 userIDField.setText("");
                 passwordField.setText("");
-                enterCaptcha.setText("");
+                enterCaptcha.setText("Enter Captcha Text");
                 userIDField.requestFocus();
             }
             else
@@ -406,19 +453,23 @@ public class LoginPage extends JFrame {
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
+
+                String message = "<html><body style='width: 300px;'><p style='font-size: 16px;'>Logging in will create a new session.</p><p style='font-size: 16px;'>Each user is allowed only one session at a time to ensure secure access to the application.</p></body></html>";
+                JOptionPane.showMessageDialog(btnUserLogin, message, "Application Message", JOptionPane.INFORMATION_MESSAGE);
+
                 dispose();
+
                 EventQueue.invokeLater(() -> {
                     try {
-                        /* if (role.equals("Admin")) {
-                            AdminDashboard frame = new AdminDashboard();
-                            frame.setVisible(true);
-                        } else if (role.equals("Faculty")) {
-                            InstitutionDashboard frame = new InstitutionDashboard();
-                            frame.setVisible(true);
-                        } else*/
-                        if (role.equals("Student")) {
-                            AdminDashboard.getUserName(login_result);
+                        if (role.equals("Admin")) {
+
+                            AdminDashboard.getUserIDFromLogin(userID);
                             AdminDashboard.main(null);
+                        } else if (role.equals("Faculty")) {
+
+                        } else
+                        {
+
                         }
                     } catch (Exception exp1) {
                         exp1.printStackTrace();
