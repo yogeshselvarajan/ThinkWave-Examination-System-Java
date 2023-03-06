@@ -314,8 +314,7 @@ public class LoginPage extends JFrame {
                     dispose();
                     EventQueue.invokeLater(() -> {
                         try {
-                            ResetPassword frame = new ResetPassword();
-                            frame.setVisible(true);
+
                         } catch (Exception exp1) {
                             exp1.printStackTrace();
                         }
@@ -390,7 +389,7 @@ public class LoginPage extends JFrame {
             String password = String.valueOf(passwordField.getPassword());
             captchaEnteredByUser = enterCaptcha.getText();
 
-            String email = RetrieveEmailID.retrieveEmail(userID);
+            String email = RetrieveEmailID.retrieveEmail(Integer.parseInt(userID));
 
             String login_result = UserLoginCheck.checkUserLogin(userID, institutionID, password, captchaFromImage, captchaEnteredByUser);
 
@@ -534,8 +533,7 @@ public class LoginPage extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 EventQueue.invokeLater(() -> {
                     try {
-                        RedirectSignUp frame = new RedirectSignUp();
-                        frame.setVisible(true);
+
                     } catch (Exception exp1) {
                         exp1.printStackTrace();
                     }

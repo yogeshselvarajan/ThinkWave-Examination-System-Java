@@ -4,16 +4,14 @@ import java.sql.*;
 
 public class RetriveUserName
 {
-    public static String getUserName(String userID) {
+    public static String getUserName(int userID) {
         String userName = null;
+        String query = "Select USER_ID,NAME from THINKWAVE.USER_DETAILS where USER_ID = ?";
+        Connection con = null;
         try {
-            Connection connection = DriverManager.getConnection(
-                    "jdbc:sqlserver://thinkwaveappln.database.windows.net:1433;database=orcl;user=thinkwave@thinkwaveappln;password=Mepcocollege1@;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;");
-
-            PreparedStatement st = (PreparedStatement) connection
-                    .prepareStatement("Select USER_ID,NAME from THINKWAVE.USER_DETAILS where USER_ID = ?");
-            st.setString(1, userID);
-
+            con = ConnectionDB.connect();
+            PreparedStatement st = con.prepareStatement(query);
+            st.setInt(1, userID);
             ResultSet rs = st.executeQuery();
             if (rs.next()) {
                 userName = rs.getString(2);

@@ -51,7 +51,7 @@ public class LoginNotifier {
         Calendar now = Calendar.getInstance();
         final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("IST"));
-        String name = RetriveUserName.getUserName(id);
+        String name = RetriveUserName.getUserName(Integer.parseInt(id));
         String IP = findIP();
         String dateTime = dateFormat.format(now.getTime()) + " IST";
 

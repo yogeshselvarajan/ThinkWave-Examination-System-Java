@@ -5,25 +5,25 @@ import SecureHash.PassBasedEnc;
 import java.sql.*;
 
 public class UpdatePassword {
-    public static void updatePassword(String userId, String password) {
+    public static boolean updatePassword(int userId, String password) {
         String salt = RetrieveSaltValue.retrieveSalt(userId);
         String securePassword = PassBasedEnc.generateSecurePassword(password, salt);
+        Connection con = null;
+        String updateSql = "UPDATE THINKWAVE.USER_AUTHENTICATION SET PASSW_HASH=?, PASSW_SALT=? WHERE USER_ID= '" + userId + "'";
         try {
-            Connection connection = DriverManager.getConnection(
-                    "jdbc:sqlserver://thinkwaveappln.database.windows.net:1433;database=orcl;user=thinkwave@thinkwaveappln;password=Mepcocollege1@;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;");
-
-            // Update the PASSW_HASH, PASSW_SALT for the userid in the database
-            PreparedStatement st = (PreparedStatement) connection
-                    .prepareStatement("UPDATE THINKWAVE.USER_AUTHENTICATION SET PASSW_HASH=?, PASSW_SALT=? WHERE USER_ID=?");
-            st.setString(1, securePassword);
-            st.setString(2,userId);
-            int rs = st.executeUpdate();
-            st.close();
-            connection.setAutoCommit(false);
-            connection.commit();
-            connection.close();
+            con = ConnectionDB.connect();
+            PreparedStatement ps = con.prepareStatement(updateSql);
+            ps.setString(1, securePassword);
+            ps.setString(2, salt);
+            ps.executeUpdate();
+            ps.close();
+            con.setAutoCommit(false);
+            con.commit();
+            con.close();
+            return true;
         } catch (SQLException sqlException) {
             sqlException.printStackTrace();
+            return false;
         }
     }
 }

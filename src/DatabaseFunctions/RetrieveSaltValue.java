@@ -4,20 +4,19 @@ import java.sql.*;
 
 public class RetrieveSaltValue
 {
-    public static String retrieveSalt(String userId) {
+    public static String retrieveSalt(int userId) {
         String passsalt = null;
+        Connection con = null;
+        String SQLQuery = "Select PASSW_SALT from THINKWAVE.USER_AUTHENTICATION WHERE USER_ID='" + userId + "'";
         try {
-            Connection connection = DriverManager.getConnection(
-                    "jdbc:sqlserver://thinkwaveappln.database.windows.net:1433;database=orcl;user=thinkwave@thinkwaveappln;password=Mepcocollege1@;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;");
-
-            PreparedStatement st = (PreparedStatement) connection
-                    .prepareStatement("Select USER_ID, PASSW_SALT from THINKWAVE.USER_AUTHENTICATION WHERE USER_ID=?");
-            st.setString(1, userId);
-
-            ResultSet rs = st.executeQuery();
+            con = ConnectionDB.connect();
+            PreparedStatement ps = con.prepareStatement(SQLQuery);
+            ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                passsalt = rs.getString(2);
+                passsalt = rs.getString(1);
             }
+            ps.close();
+            con.close();
         } catch (SQLException sqlException) {
             sqlException.printStackTrace();
         }

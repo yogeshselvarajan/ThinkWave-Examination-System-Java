@@ -2,11 +2,11 @@ package Admin;
 
 import DatabaseFunctions.ConnectionDB;
 import DatabaseFunctions.QuestionPaper.RetrieveCourseID;
+import DatabaseFunctions.RetrieveEmailID;
 import DatabaseFunctions.RetriveUserName;
 import DatabaseFunctions.UpdateLoginActivity;
 import DateTime.DateTimePanel;
 import Login.LoginPage;
-import Mail.NewUserAddedNotifier;
 import SecureHash.PassBasedEnc;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
@@ -18,23 +18,20 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.awt.font.TextAttribute;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
+import static DatabaseFunctions.UpdatePassword.updatePassword;
+import static Mail.NewUserAddedNotifier.sendnotification;
+import static Mail.PasswordChangeNotifier.sendPasswordChangeNotification;
 import static RegexChecks.CheckEmail.isValidEmail;
 
 public class AdminDashboard  extends JFrame
@@ -70,8 +67,7 @@ public class AdminDashboard  extends JFrame
     private void removeWelcomeMessage(JPanel panelright) {
         Component[] components = panelright.getComponents();
         for (Component component : components) {
-            if (component instanceof JLabel) {
-                JLabel label = (JLabel) component;
+            if (component instanceof JLabel label) {
                 if (label.getText().contains("Welcome to the ThinkWave MCQ Examination System Dashboard")) {
                     panelright.remove(label);
                     panelright.repaint();
@@ -81,8 +77,8 @@ public class AdminDashboard  extends JFrame
         }
     }
 
-    public void addMouseListenerToLblStudents(JLabel lblStudents, JPanel panelright1, JPanel panelright2, JPanel panelright3, JPanel panelright4,JPanel panelright){
-        lblStudents.addMouseListener(new MouseAdapter() {
+    public void addMouseListenerToLblUsers(JLabel lblUsers, JPanel panelright1, JPanel panelright2, JPanel panelright3, JPanel panelright4,JPanel panelright){
+        lblUsers.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 panelright1.setVisible(true);
@@ -337,7 +333,7 @@ public class AdminDashboard  extends JFrame
                                         preparedStatement2.setString(3, hash);
                                         preparedStatement2.setString(4, Salt);
                                         preparedStatement2.setString(5, institutionID);
-                                        NewUserAddedNotifier.sendnotification(email, String.valueOf(userID),password);
+                                        sendnotification(email, userID,password);
                                         preparedStatement2.executeUpdate();
 
                                     } catch (SQLException ignored) {
@@ -384,6 +380,209 @@ public class AdminDashboard  extends JFrame
                 lblEditStudent.setBounds(70, 30, 220, 30);
                 panelright2.add(lblEditStudent);
                 lblEditStudent.setForeground(Color.BLACK);
+                lblEditStudent.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        panelright1.setVisible(false);
+                        panelright2.setVisible(false);
+                        panelright3.setVisible(false);
+                        panelright4.setVisible(true);
+                        panelright1.removeAll();
+                        panelright2.removeAll();
+                        panelright3.removeAll();
+                        panelright4.removeAll();
+
+
+                        // Add a label to the panelright4 panel with the text "User ID"
+                        JLabel lblUserID = new JLabel("User ID:");
+                        lblUserID.setFont(new Font("Tahoma", Font.BOLD, 20));
+                        lblUserID.setBounds(50, 50, 100, 30);
+                        panelright4.add(lblUserID);
+                        lblUserID.setForeground(Color.BLACK);
+                        // Add a text field to the panelright4 panel with the text "User ID"
+                        JTextField txtUserID = new JTextField();
+                        txtUserID.setFont(new Font("Times New Roman", Font.PLAIN, 22));
+                        txtUserID.setBounds(150, 50, 125, 30);
+                        panelright4.add(txtUserID);
+                        txtUserID.setForeground(Color.BLACK);
+                        // txtUserID must accept a number of 5 digits only
+                        txtUserID.addKeyListener(new KeyAdapter() {
+                            @Override
+                            public void keyTyped(KeyEvent e) {
+                                char c = e.getKeyChar();
+                                if (!(Character.isDigit(c) || (c == KeyEvent.VK_BACK_SPACE) || (c == KeyEvent.VK_DELETE))) {
+                                    getToolkit().beep();
+                                    e.consume();
+                                }
+                                if (txtUserID.getText().length() >= 5) {
+                                    e.consume();
+                                }
+                            }
+                        });
+
+                        // Add a label to the panelright4 panel with the text "Name:" below the "Institution ID" label
+                        JLabel lblName = new JLabel("Name:");
+                        lblName.setFont(new Font("Tahoma", Font.BOLD, 20));
+                        lblName.setBounds(50, 150, 100, 30);
+                        panelright4.add(lblName);
+                        lblName.setForeground(Color.BLACK);
+                        // Add a text field to the panelright4 panel with the text "Name:" below the "Institution ID" text field
+                        JTextField txtName = new JTextField();
+                        txtName.setFont(new Font("Tahoma", Font.PLAIN, 20));
+                        txtName.setBounds(200, 150, 150, 30);
+                        panelright4.add(txtName);
+                        txtName.setForeground(Color.BLACK);
+
+                        // Add a label to the panelright4 panel with the text "Mobile Number:" below the "Institution ID" label
+                        JLabel lblMobileNumber = new JLabel("Mobile Number:");
+                        lblMobileNumber.setFont(new Font("Tahoma", Font.BOLD, 16));
+                        lblMobileNumber.setBounds(50, 200, 150, 30);
+                        panelright4.add(lblMobileNumber);
+                        lblMobileNumber.setForeground(Color.BLACK);
+                        // Add a text field to the panelright4 panel with the text "Mobile Number:" below the "Institution ID" text field
+                        JTextField txtMobileNumber = new JTextField();
+                        txtMobileNumber.setFont(new Font("Tahoma", Font.PLAIN, 20));
+                        txtMobileNumber.setBounds(200, 200, 150, 30);
+                        panelright4.add(txtMobileNumber);
+                        txtMobileNumber.setForeground(Color.BLACK);
+// Add a label to the panelright4 panel with the text "Email:" below the "Mobile Number" label
+                        JLabel lblEmail = new JLabel("Email:");
+                        lblEmail.setFont(new Font("Tahoma", Font.BOLD, 20));
+                        lblEmail.setBounds(50, 250, 150, 30);
+                        panelright4.add(lblEmail);
+                        lblEmail.setForeground(Color.BLACK);
+                        // Add a text field to the panelright4 panel with the text "Email:" below the "Mobile Number" text field
+                        JTextField txtEmail = new JTextField();
+                        txtEmail.setFont(new Font("Tahoma", Font.PLAIN, 20));
+                        txtEmail.setBounds(200, 250, 320, 30);
+                        panelright4.add(txtEmail);
+                        txtEmail.setForeground(Color.BLACK);
+                        // Add a label with the text "Address" to the panelright4 panel  below the "Email" label
+                        JLabel lblAddress = new JLabel("Address:");
+                        lblAddress.setFont(new Font("Tahoma", Font.BOLD, 20));
+                        lblAddress.setBounds(450, 150, 150, 30);
+                        panelright4.add(lblAddress);
+                        lblAddress.setForeground(Color.BLACK);
+                        // Add a text area for the address to the panelright4 panel below the "Email" text field
+                        JTextArea txtAddress = new JTextArea();
+                        txtAddress.setFont(new Font("Tahoma", Font.PLAIN, 16));
+                        txtAddress.setBounds(550, 150, 380, 175);
+                        panelright4.add(txtAddress);
+                        txtAddress.setForeground(Color.BLACK);
+
+                        // Add a submit button to the panelright4 panel below the text area
+                        JButton btnSubmit = new JButton("Submit");
+                        btnSubmit.setFont(new Font("Tahoma", Font.BOLD, 20));
+                        btnSubmit.setBounds(650, 50, 150, 30);
+                        panelright4.add(btnSubmit);
+                        btnSubmit.setForeground(Color.BLACK);
+
+                        // By default, all the set visible false
+                        txtAddress.setVisible(false);
+                        lblAddress.setVisible(false);
+                        lblEmail.setVisible(false);
+                        txtEmail.setVisible(false);
+                        lblMobileNumber.setVisible(false);
+                        txtMobileNumber.setVisible(false);
+                        lblName.setVisible(false);
+                        txtName.setVisible(false);
+                        btnSubmit.setVisible(false);
+
+
+                        // Add a search button to the panelright4 panel next to the text field
+                        JButton btnSearch = new JButton("Search");
+                        btnSearch.setFont(new Font("Tahoma", Font.BOLD, 20));
+                        btnSearch.setBounds(400, 50, 150, 30);
+                        panelright4.add(btnSearch);
+                        btnSearch.setForeground(Color.BLACK);
+                        btnSearch.addActionListener(e13 -> {
+                            String name; String mobilenum; String email; String address;
+                            if(txtUserID.getText().equals("")){
+                                JOptionPane.showMessageDialog(btnSearch, "Please enter the user ID", "Error", JOptionPane.ERROR_MESSAGE);
+                                txtUserID.requestFocus();
+                            }
+                            else{
+
+                            String[] userdetails = getUserDetails(txtUserID.getText());
+                            if(userdetails[0] != null && !userdetails[0].equals("Not found"))
+                                {// Store the userdetails in variables
+                                    name = userdetails[0];
+                                    mobilenum = userdetails[1];
+                                    email = userdetails[2];
+                                    address = userdetails[3];
+
+                                    // Now setVisible the labels and text fields true
+                                    txtAddress.setVisible(true);
+                                    lblAddress.setVisible(true);
+                                    lblEmail.setVisible(true);
+                                    txtEmail.setVisible(true);
+                                    lblMobileNumber.setVisible(true);
+                                    txtMobileNumber.setVisible(true);
+                                    lblName.setVisible(true);
+                                    txtName.setVisible(true);
+                                    btnSubmit.setVisible(true);
+
+                                    // Set the text of the text fields to the userdetails
+                                    txtName.setText(name);
+                                    txtMobileNumber.setText(mobilenum);
+                                    txtEmail.setText(email);
+                                    txtAddress.setText(address);
+
+                            }
+                            else{
+                                JOptionPane.showMessageDialog(btnSearch, "No user with " + txtUserID.getText() + " found", "Error", JOptionPane.ERROR_MESSAGE);
+                                txtUserID.setText("");
+                                txtUserID.requestFocus();
+                            }
+                            }
+                        });
+
+
+                        btnSubmit.addActionListener(e14 -> {
+                            // Get the text from the text fields
+                            String name = txtName.getText();
+                            String mobilenum = txtMobileNumber.getText();
+                            String email = txtEmail.getText();
+                            String address = txtAddress.getText();
+
+                            // Check what fields are all updated
+                            if (name.equals("") && mobilenum.equals("") && email.equals("") && address.equals("")) {
+                                JOptionPane.showMessageDialog(btnSubmit, "Please fill in at least one field to update");
+                                if (name.equals("")) {
+                                    txtName.requestFocus();
+                                } else if (mobilenum.equals("")) {
+                                    txtMobileNumber.requestFocus();
+                                } else if (email.equals("")) {
+                                    txtEmail.requestFocus();
+                                } else
+                                    txtAddress.requestFocus();
+                            } else {
+                                // Update the user details
+                                if (txtUserID.getText().equals("")) {
+                                    JOptionPane.showMessageDialog(btnSubmit, "Please enter a valid user ID");
+                                    txtUserID.requestFocus();
+                                } else {
+                                    if (!isValidEmail(email)) {
+                                        JOptionPane.showMessageDialog(btnSubmit, "Please enter a valid email address");
+                                        txtEmail.requestFocus();
+                                        txtEmail.setText("");
+                                    } else {
+                                        updateUserDetails(txtUserID.getText(), name, mobilenum, email, address);
+                                        JOptionPane.showMessageDialog(btnSubmit, "User details for " + txtUserID.getText() + " updated successfully");
+                                        // Clear all the text fields
+                                        txtAddress.setText("");
+                                        txtEmail.setText("");
+                                        txtMobileNumber.setText("");
+                                        txtName.setText("");
+                                        txtUserID.setText("");
+                                    }
+                                }
+                            }
+                        });
+
+
+                    }
+                });
 
                 // Add image to panelright3 panel
                 try {
@@ -393,6 +592,7 @@ public class AdminDashboard  extends JFrame
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
+
                 JLabel lblDeleteStudent = new JLabel("Delete Student");
                 lblDeleteStudent.setFont(new Font("Tahoma", Font.BOLD, 20));
                 lblDeleteStudent.setBounds(120, 30, 175, 30);
@@ -407,71 +607,6 @@ public class AdminDashboard  extends JFrame
         });
     }
 
-    public void addMouseListenerToLblTeachers(JLabel lblTeachers, JPanel panelright1, JPanel panelright2, JPanel panelright3, JPanel panelright4, JPanel panelright) {
-        lblTeachers.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                panelright1.setVisible(true);
-                panelright2.setVisible(true);
-                panelright3.setVisible(true);
-                panelright4.setVisible(false);
-
-                // Reset content of panels
-                removeWelcomeMessage(panelright);
-                panelright1.removeAll();
-                panelright2.removeAll();
-                panelright3.removeAll();
-
-
-                // Add image to panelright1 panel
-                try {
-                    JLabel imgAddTeacher = new JLabel(new ImageIcon(ImageIO.read(new File("img/Admin/teacher.png"))));
-                    imgAddTeacher.setBounds(10, 10, 50, 80);
-                    panelright1.add(imgAddTeacher);
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-                JLabel lblAddTeacher = new JLabel("Add Teacher");
-                lblAddTeacher.setFont(new Font("Tahoma", Font.BOLD, 20));
-                lblAddTeacher.setBounds(120, 30, 150, 30);
-                panelright1.add(lblAddTeacher);
-                lblAddTeacher.setForeground(Color.BLACK);
-
-                // Add image to panelright2 panel
-                try {
-                    JLabel imgEditTeacher = new JLabel(new ImageIcon(ImageIO.read(new File("img/Admin/pencil.png"))));
-                    imgEditTeacher.setBounds(10, 10, 50, 80);
-                    panelright2.add(imgEditTeacher);
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-                JLabel lblEditTeacher = new JLabel("Edit Teacher Details");
-                lblEditTeacher.setFont(new Font("Tahoma", Font.BOLD, 20));
-                lblEditTeacher.setBounds(70, 30, 220, 30);
-                panelright2.add(lblEditTeacher);
-                lblEditTeacher.setForeground(Color.BLACK);
-
-                // Add image to panelright3 panel
-                try {
-                    JLabel imgDeleteTeacher = new JLabel(new ImageIcon(ImageIO.read(new File("img/Admin/delete-account.png"))));
-                    imgDeleteTeacher.setBounds(50, 10, 50, 80);
-                    panelright3.add(imgDeleteTeacher);
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-                JLabel lblDeleteTeacher = new JLabel("Delete Teacher");
-                lblDeleteTeacher.setFont(new Font("Tahoma", Font.BOLD, 20));
-                lblDeleteTeacher.setBounds(120, 30, 175, 30);
-                panelright3.add(lblDeleteTeacher);
-                lblDeleteTeacher.setForeground(Color.BLACK);
-
-                // Repaint the panels to show the new components
-                panelright1.repaint();
-                panelright2.repaint();
-                panelright3.repaint();
-            }
-        });
-    }
     public void setupQuestionPapersPanel(JLabel lblQuestionPapers,  JPanel panelright1,  JPanel panelright2,  JPanel panelright3, JPanel panelright4, JPanel panelright) {
         lblQuestionPapers.addMouseListener(new MouseAdapter() {
             @Override
@@ -639,7 +774,7 @@ public class AdminDashboard  extends JFrame
 
     private void addWelcomeMessage(JPanel panelright) {
         String message = "<html><div style='text-align: center;'><p style='margin-bottom: 20px;'>Welcome to the ThinkWave MCQ Examination System Dashboard, esteemed Administrator!</p>"
-                + "<p style='margin-bottom: 20px;'>Here, you can manage all aspects of the system, from the Students Menu to the Faculty Menu, and everything in between. "
+                + "<p style='margin-bottom: 20px;'>Here, you can manage all aspects of the system, from the Users Menu to the Faculty Menu, and everything in between. "
                 + "With just a few clicks, you can create, edit, or delete users, upload PDFs of the question bank, and much more.</p>"
                 + "<p style='margin-bottom: 20px;'>As an administrator, you play a vital role in ensuring the smooth functioning of the system, and we are confident that you will do an excellent job in fulfilling your duties.</p>"
                 + "<p style='margin-bottom: 20px;'>Should you encounter any issues while using the system, please do not hesitate to raise a ticket from within the system, and our developers will be happy to assist you in resolving any issues that you may encounter.</p>"
@@ -652,6 +787,47 @@ public class AdminDashboard  extends JFrame
         panelright.repaint();
     }
 
+    public void updateUserDetails(String userId, String name, String mobileNum, String email, String address) {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        String sql = "UPDATE THINKWAVE.USER_DETAILS SET name=?, mobilenum=?, email=?, address=? WHERE user_id=?";
+        try {
+            // Connect to the database
+            conn = ConnectionDB.connect();
+
+            // Prepare the SQL statement to update the user details
+
+            stmt = conn.prepareStatement(sql);
+
+            // Set the parameter values for the SQL statement
+            stmt.setString(1, name);
+            stmt.setString(2, mobileNum);
+            stmt.setString(3, email);
+            stmt.setString(4, address);
+            stmt.setString(5, userId);
+
+            stmt.executeUpdate();
+            conn.setAutoCommit(false);
+            conn.commit();
+            stmt.close();
+            conn.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            // Close the database resources
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     private void nullifySessionID(String userID) {
         String updateSql = "UPDATE THINKWAVE.USER_DETAILS SET SESSIONID = NULL WHERE USER_ID = ?";
@@ -668,6 +844,189 @@ public class AdminDashboard  extends JFrame
             e1.printStackTrace();
         }
     }
+    private static String[] getUserDetails(String userId) {
+        String[] userDetails = new String[5];
+        ResultSet rs = null;
+        Connection con;
+        PreparedStatement pstmt = null;
+        String sql = "SELECT * FROM THINKWAVE.USER_DETAILS WHERE USER_ID = ?";
+        try {
+            con = ConnectionDB.connect();
+            pstmt = con.prepareStatement(sql);
+            pstmt.setString(1, userId);
+            rs = pstmt.executeQuery();
+            if (!rs.isBeforeFirst()) { // Check if result set is empty
+                return new String[]{"Not found"}; // Return "Not found" status
+            } else {
+                while (rs.next()) {
+                    userDetails[0] = rs.getString("NAME");
+                    userDetails[1] = rs.getString("MOBILENUM");
+                    userDetails[2] = rs.getString("EMAIL");
+                    userDetails[3] = rs.getString("ADDRESS");
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            // Close the resources
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pstmt != null) {
+                    pstmt.close();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return userDetails;
+    }
+
+    private void addMouseListenerToChangePassword(JLabel lblChangePassword, JPanel panelright1, JPanel panelright2, JPanel panelright3, JPanel panelright4, JPanel panelright) {
+        lblChangePassword.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                panelright1.setVisible(false);
+                panelright2.setVisible(false);
+                panelright3.setVisible(false);
+                panelright4.setVisible(true);
+
+
+                // Reset content of panels
+                removeWelcomeMessage(panelright);
+                panelright1.removeAll();
+                panelright2.removeAll();
+                panelright3.removeAll();
+                panelright4.removeAll();
+
+                JLabel userIDLabel = new JLabel("User ID:");
+                userIDLabel.setFont(new Font("Tahoma", Font.BOLD, 20));
+                userIDLabel.setForeground(Color.BLACK);
+                userIDLabel.setBounds(100, 50, 200, 30);
+                panelright4.add(userIDLabel);
+                JTextField userIDField = new JTextField();
+                userIDField.setBounds(350, 50, 100, 30);
+                userIDField.setFont(new Font("Tahoma", Font.PLAIN, 20));
+                panelright4.add(userIDField);
+
+                // Add a action listener that will allow only 5 digits to be entered in the text field
+                userIDField.addKeyListener(new KeyAdapter() {
+                    @Override
+                    public void keyTyped(KeyEvent e) {
+                        if (userIDField.getText().length() >= 5) {
+                            e.consume();
+                        }
+                    }
+                });
+
+
+                JLabel passwordLabel = new JLabel("New Password:");
+                passwordLabel.setFont(new Font("Tahoma", Font.BOLD, 20));
+                passwordLabel.setForeground(Color.BLACK);
+                passwordLabel.setBounds(100, 100, 200, 30);
+                panelright4.add(passwordLabel);
+                JPasswordField passwordField = new JPasswordField();
+                passwordField.setBounds(350, 100, 200, 30);
+                passwordField.setFont(new Font("Tahoma", Font.PLAIN, 20));
+                panelright4.add(passwordField);
+
+                JLabel confirmPasswordLabel = new JLabel("Confirm Password: ");
+                confirmPasswordLabel.setFont(new Font("Tahoma", Font.BOLD, 20));
+                confirmPasswordLabel.setForeground(Color.BLACK);
+                confirmPasswordLabel.setBounds(100, 150, 225, 30);
+                panelright4.add(confirmPasswordLabel);
+                JPasswordField confirmPasswordField = new JPasswordField();
+                confirmPasswordField.setBounds(350, 150, 200, 30);
+                confirmPasswordField.setFont(new Font("Tahoma", Font.PLAIN, 20));
+                panelright4.add(confirmPasswordField);
+
+                JButton changePasswordButton = new JButton("Change Password");
+                changePasswordButton.setBounds(350, 200, 200, 30);
+                changePasswordButton.setFont(new Font("Tahoma", Font.PLAIN, 20));
+                panelright4.add(changePasswordButton);
+
+
+                passwordField.setVisible(false);
+                confirmPasswordField.setVisible(false);
+                passwordLabel.setVisible(false);
+                confirmPasswordLabel.setVisible(false);
+                changePasswordButton.setVisible(false);
+
+                // A Button near the userID Field to search the user by ID
+                JButton searchButton = new JButton("Search");
+                searchButton.setBounds(600, 50, 100, 30);
+                searchButton.setFont(new Font("Tahoma", Font.PLAIN, 20));
+                panelright4.add(searchButton);
+                searchButton.addActionListener(e1 -> {
+                    if(userIDField.getText().equals("")) {
+                        JOptionPane.showMessageDialog(null, "Please enter the user ID to search!,", "Error", JOptionPane.ERROR_MESSAGE);
+                        userIDField.requestFocus();
+                    }
+                    else {
+                        // check if the user exists in the database
+                        String[] userdetails = getUserDetails(userIDField.getText());
+                        if (userdetails[0] != null && !userdetails[0].equals("Not found")) {// Store the userdetails in variables
+                            String name = userdetails[0];
+                            // SHow a prompt to confirm the user by showing the username
+                            String message = "<html><div style='text-align: center;'>Are you sure you want to change the password for <b>" + name + "</b>?</div></html>";
+                            int confirm = JOptionPane.showConfirmDialog(searchButton, message , "Confirm", JOptionPane.YES_NO_OPTION);
+                            if (confirm == JOptionPane.YES_OPTION) {
+                                passwordField.setVisible(true);
+                                confirmPasswordField.setVisible(true);
+                                passwordLabel.setVisible(true);
+                                confirmPasswordLabel.setVisible(true);
+                                changePasswordButton.setVisible(true);
+
+                            }
+
+                        } else {
+                            JOptionPane.showMessageDialog(searchButton, "No profile with the user ID " + userIDField.getText() + " found!", "Error", JOptionPane.ERROR_MESSAGE);
+                            userIDField.requestFocus();
+                        }
+                    }
+
+                });
+
+                changePasswordButton.addActionListener(e12 -> {
+                    if(passwordField.getText().equals("")) {
+                        JOptionPane.showMessageDialog(changePasswordButton, "Please enter the new password!", "Error", JOptionPane.ERROR_MESSAGE);
+                        passwordField.requestFocus();
+                    }
+                    else if(confirmPasswordField.getText().equals("")) {
+                        JOptionPane.showMessageDialog(changePasswordButton, "Please confirm the password!", "Error", JOptionPane.ERROR_MESSAGE);
+                        confirmPasswordField.requestFocus();
+                    }
+                    else if(!passwordField.getText().equals(confirmPasswordField.getText())) {
+                        JOptionPane.showMessageDialog(changePasswordButton, "Passwords do not match!", "Error", JOptionPane.ERROR_MESSAGE);
+                        passwordField.setText("");
+                        confirmPasswordField.setText("");
+                        passwordField.requestFocus();
+                    }
+                    else {
+                        String password = new String(passwordField.getPassword());
+                        String email = RetrieveEmailID.retrieveEmail(Integer.parseInt(userIDField.getText()));
+                        if (!updatePassword(Integer.parseInt(userIDField.getText()), password)) {
+                            JOptionPane.showMessageDialog(changePasswordButton, "Error while updating the password!", "Error", JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(changePasswordButton, "Password changed successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                            try {
+                                sendPasswordChangeNotification(email, Integer.parseInt(userIDField.getText()));
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                            userIDField.setText("");
+                            passwordField.setText("");
+                            confirmPasswordField.setText("");
+                        }
+                    }
+                });
+
+
+            }
+        });
+    }
+
 
 
     public AdminDashboard() throws IOException
@@ -730,15 +1089,6 @@ public class AdminDashboard  extends JFrame
         lblLogo.setBounds(50, 50, 150, 50);
         panelleft.add(lblLogo);
 
-
-       /* else
-        {
-            JLabel lblWelcome = new JLabel("User not got");
-            lblWelcome.setFont(new Font("Tahoma", Font.BOLD, 20));
-            lblWelcome.setBounds(50, 100, 200, 30);
-            panelleft.add(lblWelcome);
-            lblWelcome.setForeground(Color.BLACK);
-        }*/
         // Add the text Home to the panelleft panel
         JLabel lblHome = new JLabel("Home");
         lblHome.setFont(new Font("Tahoma", Font.BOLD, 20));
@@ -765,83 +1115,58 @@ public class AdminDashboard  extends JFrame
         panelleft.add(lblHome);
         lblHome.setForeground(Color.BLACK);
 
-        // Add the text Students to the panelleft panel blow the Home text
-        JLabel lblStudents = new JLabel("Students");
-        lblStudents.setFont(new Font("Tahoma", Font.BOLD, 20));
-        lblStudents.setBounds(80, 200, 100, 30);
-        panelleft.add(lblStudents);
-        lblStudents.addMouseListener(new MouseAdapter() {
+        // Add the text Users to the panelleft panel blow the Home text
+        JLabel lblUsers = new JLabel("Manage Users Details");
+        lblUsers.setFont(new Font("Tahoma", Font.BOLD, 18));
+        lblUsers.setBounds(15, 200, 200, 30);
+        panelleft.add(lblUsers);
+        lblUsers.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                Font font = lblStudents.getFont();
+                Font font = lblUsers.getFont();
                 Map attributes = font.getAttributes();
                 attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
-                lblStudents.setFont(font.deriveFont(attributes));
-                lblStudents.setForeground(Color.BLUE);
+                lblUsers.setFont(font.deriveFont(attributes));
+                lblUsers.setForeground(Color.BLUE);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                Font font = lblStudents.getFont();
+                Font font = lblUsers.getFont();
                 Map attributes = font.getAttributes();
                 attributes.put(TextAttribute.UNDERLINE, -1);
-                lblStudents.setFont(font.deriveFont(attributes));
-                lblStudents.setForeground(Color.BLACK);
+                lblUsers.setFont(font.deriveFont(attributes));
+                lblUsers.setForeground(Color.BLACK);
             }
         });
-        lblStudents.setForeground(Color.BLACK);
+        lblUsers.setForeground(Color.BLACK);
 
-        // Add the text Teachers to the panelleft panel blow the Students text
-        JLabel lblTeachers = new JLabel("Teachers");
-        lblTeachers.setFont(new Font("Tahoma", Font.BOLD, 20));
-        lblTeachers.setBounds(80, 250, 100, 30);
-        lblTeachers.addMouseListener(new MouseAdapter() {
+
+        // Add the text Exams to the panelleft panel
+        JLabel lblShowUsersList = new JLabel("Show Users List");
+        lblShowUsersList.setFont(new Font("Tahoma", Font.BOLD, 20));
+        lblShowUsersList.setBounds(30, 250, 200, 30);
+        lblShowUsersList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                Font font = lblTeachers.getFont();
+                Font font = lblShowUsersList.getFont();
                 Map attributes = font.getAttributes();
                 attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
-                lblTeachers.setFont(font.deriveFont(attributes));
-                lblTeachers.setForeground(Color.BLUE);
+                lblShowUsersList.setFont(font.deriveFont(attributes));
+                lblShowUsersList.setForeground(Color.BLUE);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                Font font = lblTeachers.getFont();
+                Font font = lblShowUsersList.getFont();
                 Map attributes = font.getAttributes();
                 attributes.put(TextAttribute.UNDERLINE, -1);
-                lblTeachers.setFont(font.deriveFont(attributes));
-                lblTeachers.setForeground(Color.BLACK);
+                lblShowUsersList.setFont(font.deriveFont(attributes));
+                lblShowUsersList.setForeground(Color.BLACK);
             }
         });
-        panelleft.add(lblTeachers);
-        lblTeachers.setForeground(Color.BLACK);
-
-        // Add the text Exams to the panelleft panel blow the Teachers text
-        JLabel lblExams = new JLabel("Exams");
-        lblExams.setFont(new Font("Tahoma", Font.BOLD, 20));
-        lblExams.setBounds(80, 300, 100, 30);
-        lblExams.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                Font font = lblExams.getFont();
-                Map attributes = font.getAttributes();
-                attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
-                lblExams.setFont(font.deriveFont(attributes));
-                lblExams.setForeground(Color.BLUE);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                Font font = lblExams.getFont();
-                Map attributes = font.getAttributes();
-                attributes.put(TextAttribute.UNDERLINE, -1);
-                lblExams.setFont(font.deriveFont(attributes));
-                lblExams.setForeground(Color.BLACK);
-            }
-        });
-        panelleft.add(lblExams);
-        lblExams.setForeground(Color.BLACK);
+        panelleft.add(lblShowUsersList);
+        lblShowUsersList.setForeground(Color.BLACK);
 
         // Add the text Question Papers to the panelleft panel blow the Exams text
         JLabel lblQuestionPapers = new JLabel("Question Bank");
@@ -869,33 +1194,33 @@ public class AdminDashboard  extends JFrame
         panelleft.add(lblQuestionPapers);
         lblQuestionPapers.setForeground(Color.BLACK);
 
-        // Add the text Settings to the panelleft panel blow the Question Papers text
-        JLabel lblSettings = new JLabel("Settings");
-        lblSettings.setFont(new Font("Tahoma", Font.BOLD, 20));
-        lblSettings.setBounds(80, 400, 100, 30);
-        panelleft.add(lblSettings);
-        lblSettings.addMouseListener(new MouseAdapter() {
+        // Add the text ChangePassword to the panelleft panel blow the Question Papers text
+        JLabel lblChangePassword = new JLabel("Change Password");
+        lblChangePassword.setFont(new Font("Tahoma", Font.BOLD, 20));
+        lblChangePassword.setBounds(25, 400, 200, 30);
+        panelleft.add(lblChangePassword);
+        lblChangePassword.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                Font font = lblSettings.getFont();
+                Font font = lblChangePassword.getFont();
                 Map attributes = font.getAttributes();
                 attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
-                lblSettings.setFont(font.deriveFont(attributes));
-                lblSettings.setForeground(Color.BLUE);
+                lblChangePassword.setFont(font.deriveFont(attributes));
+                lblChangePassword.setForeground(Color.BLUE);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                Font font = lblSettings.getFont();
+                Font font = lblChangePassword.getFont();
                 Map attributes = font.getAttributes();
                 attributes.put(TextAttribute.UNDERLINE, -1);
-                lblSettings.setFont(font.deriveFont(attributes));
-                lblSettings.setForeground(Color.BLACK);
+                lblChangePassword.setFont(font.deriveFont(attributes));
+                lblChangePassword.setForeground(Color.BLACK);
             }
         });
-        lblSettings.setForeground(Color.BLACK);
+        lblChangePassword.setForeground(Color.BLACK);
 
-        // Add the text Logout to the panelleft panel blow the Settings text
+        // Add the text Logout to the panelleft panel blow the ChangePassword text
         JLabel lblLogout = new JLabel("Logout");
         lblLogout.setFont(new Font("Tahoma", Font.BOLD, 20));
         lblLogout.setBounds(80, 450, 100, 30);
@@ -948,11 +1273,11 @@ public class AdminDashboard  extends JFrame
         contentPane.add(panelright);
         panelright.setVisible(true);
 
-        JLabel lblWelcome = new JLabel("You are logged in as: " + RetriveUserName.getUserName(gotUserID));
+       /* JLabel lblWelcome = new JLabel("You are logged in as: " + RetriveUserName.getUserName(Integer.parseInt(gotUserID)));
         lblWelcome.setFont(new Font("Tahoma", Font.BOLD, 20));
         lblWelcome.setBounds(700, 10, 500, 30);
         panelright.add(lblWelcome);
-        lblWelcome.setForeground(Color.YELLOW);
+        lblWelcome.setForeground(Color.YELLOW);*/
 
         // Display the Welcome text for the admin.
         addWelcomeMessage(panelright);
@@ -997,17 +1322,218 @@ public class AdminDashboard  extends JFrame
         panelright4.setVisible(false);
         panelright.add(panelright4);
 
-        // Performs an action when the user clicks on the Students text
-        addMouseListenerToLblStudents(lblStudents, panelright1, panelright2, panelright3, panelright4, panelright);
-        // Performs an action when the user clicks on the Teachers text
-        addMouseListenerToLblTeachers(lblTeachers, panelright1, panelright2, panelright3, panelright4, panelright);
+        // Performs an action when the user clicks on the Users text
+        addMouseListenerToLblUsers(lblUsers, panelright1, panelright2, panelright3, panelright4, panelright);
         // Performs an action when the user clicks on the Question Papers text
         setupQuestionPapersPanel(lblQuestionPapers, panelright1, panelright2, panelright3, panelright4, panelright);
+        addMouseListenerToChangePassword(lblChangePassword, panelright1, panelright2, panelright3, panelright4, panelright);
+
+        addMouseListenerToShowUserList(lblShowUsersList, panelright1, panelright2, panelright3, panelright4, panelright);
 
         // import the addTimeFooter method from the DateTimePanel class
         DateTimePanel dateTimePanel = new DateTimePanel();
         dateTimePanel.addTimeFooter(contentPane);
         dateTimePanel.setVisible(true);
+    }
+
+    private void addMouseListenerToShowUserList(JLabel lblShowUsersList, JPanel panelright1, JPanel panelright2, JPanel panelright3, JPanel panelright4, JPanel panelright) {
+    lblShowUsersList.addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            panelright1.setVisible(true);
+            panelright2.setVisible(true);
+            panelright3.setVisible(false);
+            panelright4.setVisible(false);
+
+
+            // Reset content of panels
+            removeWelcomeMessage(panelright);
+            panelright1.removeAll();
+            panelright2.removeAll();
+            panelright3.removeAll();
+            panelright4.removeAll();
+
+            // Add image to panelright1 panel
+            try {
+                JLabel imgStudentList= new JLabel(new ImageIcon(ImageIO.read(new File("img/Admin/studentlist.png"))));
+                imgStudentList.setBounds(50, 10, 50, 80);
+                panelright1.add(imgStudentList);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            // Add content to panelright1
+            JLabel lblShowStudentList = new JLabel("Student List");
+            lblShowStudentList.setBounds(120, 30, 175, 30);
+            lblShowStudentList.setFont(new Font("Tahoma", Font.BOLD, 20));
+            panelright1.add(lblShowStudentList);
+            lblShowStudentList.setForeground(Color.BLACK);
+
+            // When lblShowStudentList is clicked, an object to UserTableFrame is created and is displayed
+            lblShowStudentList.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    UserTableModel model = new UserTableModel();
+                    JTable table = new JTable(model);
+                    JScrollPane scrollPane = new JScrollPane(table);
+                    String sql = "SELECT ud.USER_ID, ud.NAME\n" +
+                            "FROM THINKWAVE.USER_AUTHENTICATION ua\n" +
+                            "INNER JOIN THINKWAVE.USER_DETAILS ud\n" +
+                            "ON ua.USER_ID = ud.USER_ID\n" +
+                            "WHERE ua.ROLE = 'Student'";
+
+                    // fetch user data from database and populate the TableModel
+                    Connection con = null;
+                    try {
+                        con = ConnectionDB.connect();
+                        Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+                        stmt.setFetchSize(1000); // set the fetch size to a non-zero value
+                        ResultSet rs = stmt.executeQuery(sql);
+
+                        // store the data in a two-dimensional array
+                        int rowCount = 0;
+                        while (rs.next()) {
+                            rowCount++;
+                        }
+                        rs.beforeFirst();
+
+                        if (rowCount == 0) {
+                            JOptionPane.showMessageDialog(lblShowStudentList, "There are no students registered in the system for this institution", "No Students", JOptionPane.INFORMATION_MESSAGE);
+                            panelright1.setVisible(true);
+                            panelright2.setVisible(true);
+                            panelright3.setVisible(false);
+
+                            // Reset content of panels
+                            removeWelcomeMessage(panelright);
+                            panelright4.removeAll();
+
+                            panelright4.setVisible(false);
+
+                        }
+                        else {
+                            Object[][] data = new Object[rowCount][2];
+                            int i = 0;
+                            while (rs.next()) {
+                                data[i][0] = rs.getInt("USER_ID");
+                                data[i][1] = rs.getString("NAME");
+                                i++;
+                            }
+
+                            model.setData(data);
+
+                            rs.close();
+                            stmt.close();
+                            con.close();
+
+                            panelright1.setVisible(false);
+                            panelright2.setVisible(false);
+
+                            panelright4.removeAll();
+                            panelright4.setLayout(new BorderLayout());
+                            panelright4.add(scrollPane, BorderLayout.CENTER);
+                            panelright4.revalidate();
+                            panelright4.repaint();
+                            panelright4.setVisible(true);
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+
+                }
+            });
+
+
+
+            // Add image to panelright2 panel
+            try {
+                JLabel imgFacultyList= new JLabel(new ImageIcon(ImageIO.read(new File("img/Admin/facultylist.png"))));
+                imgFacultyList.setBounds(50, 10, 50, 80);
+                panelright2.add(imgFacultyList);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            // Add content to panelright2
+            JLabel lblShowFacultyList = new JLabel("Faculty List");
+            lblShowFacultyList.setBounds(120, 30, 175, 30);
+            lblShowFacultyList.setFont(new Font("Tahoma", Font.BOLD, 20));
+            panelright2.add(lblShowFacultyList);
+            lblShowFacultyList.setForeground(Color.BLACK);
+            lblShowFacultyList.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    UserTableModel model = new UserTableModel();
+                    JTable table = new JTable(model);
+                    JScrollPane scrollPane = new JScrollPane(table);
+                    String sql = "SELECT ud.USER_ID, ud.NAME\n" +
+                            "FROM THINKWAVE.USER_AUTHENTICATION ua\n" +
+                            "INNER JOIN THINKWAVE.USER_DETAILS ud\n" +
+                            "ON ua.USER_ID = ud.USER_ID\n" +
+                            "WHERE ua.ROLE = 'Faculty'";
+
+                    // fetch user data from database and populate the TableModel
+                    Connection con = null;
+                    try {
+                        con = ConnectionDB.connect();
+                        Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+                        stmt.setFetchSize(1000); // set the fetch size to a non-zero value
+                        ResultSet rs = stmt.executeQuery(sql);
+
+                        // store the data in a two-dimensional array
+                        int rowCount = 0;
+                        while (rs.next()) {
+                            rowCount++;
+                        }
+                        rs.beforeFirst();
+
+                        if (rowCount == 0) {
+                            JOptionPane.showMessageDialog(lblShowStudentList, "There are no faculty registered in the system for this institution", "No Students", JOptionPane.INFORMATION_MESSAGE);
+
+                            panelright1.setVisible(true);
+                            panelright2.setVisible(true);
+                            panelright3.setVisible(false);
+                            panelright4.setVisible(false);
+
+                            // Reset content of panels
+                            removeWelcomeMessage(panelright);
+                            panelright4.removeAll();
+                            panelright4.revalidate();
+                            panelright4.repaint();
+                        }
+                        else {
+                            Object[][] data = new Object[rowCount][2];
+                            int i = 0;
+                            while (rs.next()) {
+                                data[i][0] = rs.getInt("USER_ID");
+                                data[i][1] = rs.getString("NAME");
+                                i++;
+                            }
+
+                            model.setData(data);
+
+                            rs.close();
+                            stmt.close();
+                            con.close();
+
+                            panelright1.setVisible(false);
+                            panelright2.setVisible(false);
+
+                            panelright4.removeAll();
+                            panelright4.setLayout(new BorderLayout());
+                            panelright4.add(scrollPane, BorderLayout.CENTER);
+                            panelright4.revalidate();
+                            panelright4.repaint();
+                            panelright4.setVisible(true);
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+
+                }
+            });
+
+        }
+    });
     }
 
 }

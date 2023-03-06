@@ -7,7 +7,7 @@ import java.io.IOException;
 
 public class NewUserAddedNotifier
 {
-    public static void sendnotification(String email, String id, String password) throws IOException
+    public static void sendnotification(String email, int id, String password) throws IOException
     {
         String name = RetriveUserName.getUserName(id);
 
