@@ -3,7 +3,6 @@ package Admin;
 import DatabaseFunctions.ConnectionDB;
 import DatabaseFunctions.QuestionPaper.RetrieveCourseID;
 import DatabaseFunctions.RetrieveEmailID;
-import DatabaseFunctions.RetriveUserName;
 import DatabaseFunctions.UpdateLoginActivity;
 import DateTime.DateTimePanel;
 import Login.LoginPage;
@@ -77,6 +76,25 @@ public class AdminDashboard  extends JFrame
         }
     }
 
+    private void removeTable(JPanel panel) {
+        Component[] components = panel.getComponents();
+        for (Component component : components) {
+            if (component instanceof JScrollPane) {
+                Component viewport = ((JScrollPane) component).getViewport().getView();
+                if (viewport instanceof JTable) {
+                    JTable table = (JTable) viewport;
+                    if (table.getModel() instanceof UserTableModel) {
+                        panel.remove(component);
+                        break;
+                    }
+                }
+            }
+        }
+        panel.revalidate();
+        panel.repaint();
+    }
+
+
     public void addMouseListenerToLblUsers(JLabel lblUsers, JPanel panelright1, JPanel panelright2, JPanel panelright3, JPanel panelright4,JPanel panelright){
         lblUsers.addMouseListener(new MouseAdapter() {
             @Override
@@ -89,9 +107,18 @@ public class AdminDashboard  extends JFrame
 
                 // Reset content of panels
                 removeWelcomeMessage(panelright);
+                removeTable(panelright4);
                 panelright1.removeAll();
                 panelright2.removeAll();
                 panelright3.removeAll();
+
+                panelright4.removeAll();
+                panelright4.revalidate();
+                panelright4.repaint();
+
+                panelright4.setBackground(Color.YELLOW);
+                panelright4.setBorder(new LineBorder(Color.BLACK, 2));
+                panelright4.setLayout(null);
 
 
                 // Add image to panelright1 panel
@@ -102,7 +129,7 @@ public class AdminDashboard  extends JFrame
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
-                JLabel lblAddStudent = new JLabel("Add Student");
+                JLabel lblAddStudent = new JLabel("Add User");
                 lblAddStudent.setFont(new Font("Tahoma", Font.BOLD, 20));
                 lblAddStudent.setBounds(120, 30, 150, 30);
                 panelright1.add(lblAddStudent);
@@ -114,12 +141,13 @@ public class AdminDashboard  extends JFrame
                         panelright1.setVisible(false);
                         panelright2.setVisible(false);
                         panelright3.setVisible(false);
-                        panelright4.setVisible(true);
+
                         panelright1.removeAll();
                         panelright2.removeAll();
                         panelright3.removeAll();
-                        panelright4.removeAll();
+                        removeTable(panelright4);
 
+                        panelright4.setVisible(true);
 
 
                         // Add a label to the panelright4 panel with the text "User ID"
@@ -335,6 +363,9 @@ public class AdminDashboard  extends JFrame
                                         preparedStatement2.setString(5, institutionID);
                                         sendnotification(email, userID,password);
                                         preparedStatement2.executeUpdate();
+                                        connection.setAutoCommit(false);
+                                        connection.commit(); // commit the transaction
+
 
                                     } catch (SQLException ignored) {
                                     } catch (IOException ex) {
@@ -343,6 +374,8 @@ public class AdminDashboard  extends JFrame
                                 } catch (SQLException ignored) {
                                 }
                             }
+                            panelright4.revalidate();
+                            panelright4.repaint();
 
                         });
 
@@ -375,7 +408,7 @@ public class AdminDashboard  extends JFrame
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
-                JLabel lblEditStudent = new JLabel("Edit Student Details");
+                JLabel lblEditStudent = new JLabel("Edit User Details");
                 lblEditStudent.setFont(new Font("Tahoma", Font.BOLD, 20));
                 lblEditStudent.setBounds(70, 30, 220, 30);
                 panelright2.add(lblEditStudent);
@@ -386,11 +419,20 @@ public class AdminDashboard  extends JFrame
                         panelright1.setVisible(false);
                         panelright2.setVisible(false);
                         panelright3.setVisible(false);
-                        panelright4.setVisible(true);
+
                         panelright1.removeAll();
                         panelright2.removeAll();
                         panelright3.removeAll();
+
+
                         panelright4.removeAll();
+                        panelright4.revalidate();
+                        panelright4.repaint();
+                        panelright4.setVisible(true);
+
+                        panelright4.setBackground(Color.YELLOW);
+                        panelright4.setBorder(new LineBorder(Color.BLACK, 2));
+                        panelright4.setLayout(null);
 
 
                         // Add a label to the panelright4 panel with the text "User ID"
@@ -593,17 +635,144 @@ public class AdminDashboard  extends JFrame
                     throw new RuntimeException(ex);
                 }
 
-                JLabel lblDeleteStudent = new JLabel("Delete Student");
+                JLabel lblDeleteStudent = new JLabel("Delete User");
                 lblDeleteStudent.setFont(new Font("Tahoma", Font.BOLD, 20));
                 lblDeleteStudent.setBounds(120, 30, 175, 30);
                 panelright3.add(lblDeleteStudent);
                 lblDeleteStudent.setForeground(Color.BLACK);
+
+                lblDeleteStudent.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        removeWelcomeMessage(panelright);
+                        removeTable(panelright4);
+                        panelright1.setVisible(false);
+                        panelright2.setVisible(false);
+                        panelright3.setVisible(false);
+
+                        panelright4.setVisible(true);
+
+                        panelright3.removeAll();
+                        panelright3.revalidate();
+                        panelright3.repaint();
+
+                        panelright4.setBackground(Color.YELLOW);
+                        panelright4.setBorder(new LineBorder(Color.BLACK, 2));
+                        panelright4.setLayout(null);
+
+                        // Add a label with the text User ID: to the panelright3 panel
+                        JLabel lblUserID = new JLabel("User ID:");
+                        lblUserID.setFont(new Font("Tahoma", Font.BOLD, 20));
+                        lblUserID.setBounds(50, 50, 100, 30);
+                        panelright4.add(lblUserID);
+                        lblUserID.setForeground(Color.BLACK);
+
+                        // Add a text field to the panelright3 panel next to the label
+                        JTextField txtUserID = new JTextField();
+                        txtUserID.setFont(new Font("Tahoma", Font.PLAIN, 20));
+                        txtUserID.setBounds(200, 50, 125, 30);
+                        panelright4.add(txtUserID);
+                        txtUserID.setForeground(Color.BLACK);
+                        // Allow only 5 digits to be entered in the text field
+                        txtUserID.addKeyListener(new KeyAdapter() {
+                            @Override
+                            public void keyTyped(KeyEvent e) {
+                                if (txtUserID.getText().length() >= 5) {
+                                    e.consume();
+                                }
+                            }
+                        });
+                        // Dont allow any other characters than numbers to be entered in the text field
+                        txtUserID.addKeyListener(new KeyAdapter() {
+                            @Override
+                            public void keyTyped(KeyEvent e) {
+                                char c = e.getKeyChar();
+                                if (!(Character.isDigit(c) || (c == KeyEvent.VK_BACK_SPACE) || (c == KeyEvent.VK_DELETE))) {
+                                    e.consume();
+                                }
+                            }
+                        });
+
+                        // A Button near the userID Field to search the user by ID
+                        JButton searchButton = new JButton("Search");
+                        searchButton.setBounds(600, 50, 100, 30);
+                        searchButton.setFont(new Font("Tahoma", Font.PLAIN, 20));
+                        panelright4.add(searchButton);
+                        searchButton.addActionListener(e1 -> {
+                            if(txtUserID.getText().equals("")) {
+                                JOptionPane.showMessageDialog(searchButton, "Please enter the user ID to search!,", "Error", JOptionPane.ERROR_MESSAGE);
+                                txtUserID.requestFocus();
+                            }
+                            else {
+                                // check if the user exists in the database
+                                String[] userdetails = getUserDetails(txtUserID.getText());
+                                if (userdetails[0] != null && !userdetails[0].equals("Not found")) {// Store the userdetails in variables
+                                    String name = userdetails[0];
+                                    // SHow a prompt to confirm the user by showing the username
+                                    String message = "Are you sure you want to delete the user " + name + "?";
+                                    int confirm = JOptionPane.showConfirmDialog(searchButton, message , "Confirm", JOptionPane.YES_NO_OPTION);
+                                    if (confirm == JOptionPane.YES_OPTION) {
+                                        // Delete the user
+                                        try {
+                                            if (deleteUserData(Integer.parseInt(txtUserID.getText()))) {
+                                                JOptionPane.showMessageDialog(searchButton, "User " + txtUserID.getText() + " deleted successfully");
+                                                txtUserID.setText("");
+                                                txtUserID.requestFocus();
+                                            }
+                                        } catch (SQLException ex) {
+                                            throw new RuntimeException(ex);
+                                        }
+                                    }
+
+                                } else {
+                                        JOptionPane.showMessageDialog(searchButton, "No profile with the user ID " + txtUserID.getText() + " found", "Error", JOptionPane.ERROR_MESSAGE);
+                                          txtUserID.setText("");
+                                }
+                            }
+
+                        });
+
+                    }
+                });
 
                 // Repaint the panels to show the new components
                 panelright1.repaint();
                 panelright2.repaint();
                 panelright3.repaint();
             }
+
+            public boolean deleteUserData(int userId) throws SQLException {
+                Connection connection =  ConnectionDB.connect();
+                PreparedStatement deleteAuth = connection.prepareStatement("DELETE FROM USER_AUTHENTICATION WHERE USER_ID = ?");
+                PreparedStatement deleteDetails = connection.prepareStatement("DELETE FROM USER_DETAILS WHERE USER_ID = ?");
+
+                connection.setAutoCommit(false); // Start a transaction
+                try {
+                    deleteAuth.setInt(1, userId);
+                    int deletedAuth = deleteAuth.executeUpdate();
+
+                    deleteDetails.setInt(1, userId);
+                    int deletedDetails = deleteDetails.executeUpdate();
+
+
+                    if (deletedAuth == 0 || deletedDetails == 0) {
+                        connection.setAutoCommit(true); // Restore auto-commit mode
+                        connection.rollback(); // Roll back the transaction if no rows were deleted
+                        throw new SQLException("No rows deleted for USER_ID " + userId);
+                    } else {
+                        connection.setAutoCommit(false); // Start a transaction
+                        connection.commit(); // Commit the transaction if both delete statements succeeded
+                        return true;
+                    }
+                } catch (SQLException e) {
+                    connection.rollback(); // Roll back the transaction on any exception
+                    throw e;
+                } finally {
+                    connection.setAutoCommit(true); // Restore auto-commit mode
+                    connection.close(); // Close the connection
+                }
+            }
+
         });
     }
 
@@ -611,11 +780,16 @@ public class AdminDashboard  extends JFrame
         lblQuestionPapers.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                removeWelcomeMessage(panelright);
                 panelright1.setVisible(false);
                 panelright2.setVisible(false);
                 panelright3.setVisible(false);
-                panelright4.setVisible(true);
                 panelright.setVisible(true);
+
+                panelright4.removeAll();
+                panelright4.revalidate();
+                panelright4.repaint();
+                panelright4.setVisible(true);
 
                 // Add a label with the text CourseCode: to the panelright4 panel
                 JLabel lblCourseCode = new JLabel("Course Code:");
@@ -890,7 +1064,7 @@ public class AdminDashboard  extends JFrame
                 panelright1.setVisible(false);
                 panelright2.setVisible(false);
                 panelright3.setVisible(false);
-                panelright4.setVisible(true);
+
 
 
                 // Reset content of panels
@@ -898,7 +1072,11 @@ public class AdminDashboard  extends JFrame
                 panelright1.removeAll();
                 panelright2.removeAll();
                 panelright3.removeAll();
+
                 panelright4.removeAll();
+                panelright4.revalidate();
+                panelright4.repaint();
+                panelright4.setVisible(true);
 
                 JLabel userIDLabel = new JLabel("User ID:");
                 userIDLabel.setFont(new Font("Tahoma", Font.BOLD, 20));
@@ -1118,7 +1296,7 @@ public class AdminDashboard  extends JFrame
         // Add the text Users to the panelleft panel blow the Home text
         JLabel lblUsers = new JLabel("Manage Users Details");
         lblUsers.setFont(new Font("Tahoma", Font.BOLD, 18));
-        lblUsers.setBounds(15, 200, 200, 30);
+        lblUsers.setBounds(15, 200, 250, 30);
         panelleft.add(lblUsers);
         lblUsers.addMouseListener(new MouseAdapter() {
             @Override
@@ -1167,6 +1345,32 @@ public class AdminDashboard  extends JFrame
         });
         panelleft.add(lblShowUsersList);
         lblShowUsersList.setForeground(Color.BLACK);
+
+        // Add the text Remove Session to the panelleft panel blow the Show Users List text
+        JLabel lblRemoveSession = new JLabel("Force Logout Users");
+        lblRemoveSession.setFont(new Font("Tahoma", Font.BOLD, 20));
+        lblRemoveSession.setBounds(30, 300, 200, 30);
+        lblRemoveSession.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                Font font = lblRemoveSession.getFont();
+                Map attributes = font.getAttributes();
+                attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+                lblRemoveSession.setFont(font.deriveFont(attributes));
+                lblRemoveSession.setForeground(Color.BLUE);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                Font font = lblRemoveSession.getFont();
+                Map attributes = font.getAttributes();
+                attributes.put(TextAttribute.UNDERLINE, -1);
+                lblRemoveSession.setFont(font.deriveFont(attributes));
+                lblRemoveSession.setForeground(Color.BLACK);
+            }
+        });
+        panelleft.add(lblRemoveSession);
+
 
         // Add the text Question Papers to the panelleft panel blow the Exams text
         JLabel lblQuestionPapers = new JLabel("Question Bank");
@@ -1330,210 +1534,307 @@ public class AdminDashboard  extends JFrame
 
         addMouseListenerToShowUserList(lblShowUsersList, panelright1, panelright2, panelright3, panelright4, panelright);
 
+        addMouseListenerToForceLogout(lblRemoveSession, panelright1, panelright2, panelright3, panelright4, panelright);
+
         // import the addTimeFooter method from the DateTimePanel class
         DateTimePanel dateTimePanel = new DateTimePanel();
         dateTimePanel.addTimeFooter(contentPane);
         dateTimePanel.setVisible(true);
     }
 
-    private void addMouseListenerToShowUserList(JLabel lblShowUsersList, JPanel panelright1, JPanel panelright2, JPanel panelright3, JPanel panelright4, JPanel panelright) {
-    lblShowUsersList.addMouseListener(new MouseAdapter() {
+    private void addMouseListenerToForceLogout(JLabel lblRemoveSession, JPanel panelright1, JPanel panelright2, JPanel panelright3, JPanel panelright4, JPanel panelright) {
+
+    lblRemoveSession.addMouseListener(new MouseAdapter() {
         @Override
         public void mouseClicked(MouseEvent e) {
-            panelright1.setVisible(true);
-            panelright2.setVisible(true);
+            panelright1.setVisible(false);
+            panelright2.setVisible(false);
             panelright3.setVisible(false);
             panelright4.setVisible(false);
 
-
             // Reset content of panels
             removeWelcomeMessage(panelright);
+            removeTable(panelright4);
             panelright1.removeAll();
             panelright2.removeAll();
             panelright3.removeAll();
             panelright4.removeAll();
 
-            // Add image to panelright1 panel
-            try {
-                JLabel imgStudentList= new JLabel(new ImageIcon(ImageIO.read(new File("img/Admin/studentlist.png"))));
-                imgStudentList.setBounds(50, 10, 50, 80);
-                panelright1.add(imgStudentList);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
+            panelright4.setBackground(Color.YELLOW);
+            panelright4.setBorder(new LineBorder(Color.BLACK, 2));
+            panelright4.setLayout(null);
+            panelright4.setVisible(true);
 
-            // Add content to panelright1
-            JLabel lblShowStudentList = new JLabel("Student List");
-            lblShowStudentList.setBounds(120, 30, 175, 30);
-            lblShowStudentList.setFont(new Font("Tahoma", Font.BOLD, 20));
-            panelright1.add(lblShowStudentList);
-            lblShowStudentList.setForeground(Color.BLACK);
+            // Add a label with the text User ID: to the panelright3 panel
+            JLabel lblUserID = new JLabel("User ID:");
+            lblUserID.setFont(new Font("Tahoma", Font.BOLD, 20));
+            lblUserID.setBounds(50, 50, 100, 30);
+            panelright4.add(lblUserID);
+            lblUserID.setForeground(Color.BLACK);
 
-            // When lblShowStudentList is clicked, an object to UserTableFrame is created and is displayed
-            lblShowStudentList.addMouseListener(new MouseAdapter() {
+            // Add a text field to the panelright3 panel next to the label
+            JTextField txtUserID = new JTextField();
+            txtUserID.setFont(new Font("Tahoma", Font.PLAIN, 20));
+            txtUserID.setBounds(200, 50, 125, 30);
+            panelright4.add(txtUserID);
+            txtUserID.setForeground(Color.BLACK);
+            // Allow only 5 digits to be entered in the text field
+            txtUserID.addKeyListener(new KeyAdapter() {
                 @Override
-                public void mouseClicked(MouseEvent e) {
-                    UserTableModel model = new UserTableModel();
-                    JTable table = new JTable(model);
-                    JScrollPane scrollPane = new JScrollPane(table);
-                    String sql = "SELECT ud.USER_ID, ud.NAME\n" +
-                            "FROM THINKWAVE.USER_AUTHENTICATION ua\n" +
-                            "INNER JOIN THINKWAVE.USER_DETAILS ud\n" +
-                            "ON ua.USER_ID = ud.USER_ID\n" +
-                            "WHERE ua.ROLE = 'Student'";
-
-                    // fetch user data from database and populate the TableModel
-                    Connection con = null;
-                    try {
-                        con = ConnectionDB.connect();
-                        Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-                        stmt.setFetchSize(1000); // set the fetch size to a non-zero value
-                        ResultSet rs = stmt.executeQuery(sql);
-
-                        // store the data in a two-dimensional array
-                        int rowCount = 0;
-                        while (rs.next()) {
-                            rowCount++;
-                        }
-                        rs.beforeFirst();
-
-                        if (rowCount == 0) {
-                            JOptionPane.showMessageDialog(lblShowStudentList, "There are no students registered in the system for this institution", "No Students", JOptionPane.INFORMATION_MESSAGE);
-                            panelright1.setVisible(true);
-                            panelright2.setVisible(true);
-                            panelright3.setVisible(false);
-
-                            // Reset content of panels
-                            removeWelcomeMessage(panelright);
-                            panelright4.removeAll();
-
-                            panelright4.setVisible(false);
-
-                        }
-                        else {
-                            Object[][] data = new Object[rowCount][2];
-                            int i = 0;
-                            while (rs.next()) {
-                                data[i][0] = rs.getInt("USER_ID");
-                                data[i][1] = rs.getString("NAME");
-                                i++;
-                            }
-
-                            model.setData(data);
-
-                            rs.close();
-                            stmt.close();
-                            con.close();
-
-                            panelright1.setVisible(false);
-                            panelright2.setVisible(false);
-
-                            panelright4.removeAll();
-                            panelright4.setLayout(new BorderLayout());
-                            panelright4.add(scrollPane, BorderLayout.CENTER);
-                            panelright4.revalidate();
-                            panelright4.repaint();
-                            panelright4.setVisible(true);
-                        }
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
+                public void keyTyped(KeyEvent e) {
+                    if (txtUserID.getText().length() >= 5) {
+                        e.consume();
                     }
-
+                }
+            });
+            // Dont allow any other characters than numbers to be entered in the text field
+            txtUserID.addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyTyped(KeyEvent e) {
+                    char c = e.getKeyChar();
+                    if (!(Character.isDigit(c) || (c == KeyEvent.VK_BACK_SPACE) || (c == KeyEvent.VK_DELETE))) {
+                        e.consume();
+                    }
                 }
             });
 
-
-
-            // Add image to panelright2 panel
-            try {
-                JLabel imgFacultyList= new JLabel(new ImageIcon(ImageIO.read(new File("img/Admin/facultylist.png"))));
-                imgFacultyList.setBounds(50, 10, 50, 80);
-                panelright2.add(imgFacultyList);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-
-            // Add content to panelright2
-            JLabel lblShowFacultyList = new JLabel("Faculty List");
-            lblShowFacultyList.setBounds(120, 30, 175, 30);
-            lblShowFacultyList.setFont(new Font("Tahoma", Font.BOLD, 20));
-            panelright2.add(lblShowFacultyList);
-            lblShowFacultyList.setForeground(Color.BLACK);
-            lblShowFacultyList.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    UserTableModel model = new UserTableModel();
-                    JTable table = new JTable(model);
-                    JScrollPane scrollPane = new JScrollPane(table);
-                    String sql = "SELECT ud.USER_ID, ud.NAME\n" +
-                            "FROM THINKWAVE.USER_AUTHENTICATION ua\n" +
-                            "INNER JOIN THINKWAVE.USER_DETAILS ud\n" +
-                            "ON ua.USER_ID = ud.USER_ID\n" +
-                            "WHERE ua.ROLE = 'Faculty'";
-
-                    // fetch user data from database and populate the TableModel
-                    Connection con = null;
-                    try {
-                        con = ConnectionDB.connect();
-                        Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-                        stmt.setFetchSize(1000); // set the fetch size to a non-zero value
-                        ResultSet rs = stmt.executeQuery(sql);
-
-                        // store the data in a two-dimensional array
-                        int rowCount = 0;
-                        while (rs.next()) {
-                            rowCount++;
-                        }
-                        rs.beforeFirst();
-
-                        if (rowCount == 0) {
-                            JOptionPane.showMessageDialog(lblShowStudentList, "There are no faculty registered in the system for this institution", "No Students", JOptionPane.INFORMATION_MESSAGE);
-
-                            panelright1.setVisible(true);
-                            panelright2.setVisible(true);
-                            panelright3.setVisible(false);
-                            panelright4.setVisible(false);
-
-                            // Reset content of panels
-                            removeWelcomeMessage(panelright);
-                            panelright4.removeAll();
-                            panelright4.revalidate();
-                            panelright4.repaint();
-                        }
-                        else {
-                            Object[][] data = new Object[rowCount][2];
-                            int i = 0;
-                            while (rs.next()) {
-                                data[i][0] = rs.getInt("USER_ID");
-                                data[i][1] = rs.getString("NAME");
-                                i++;
-                            }
-
-                            model.setData(data);
-
-                            rs.close();
-                            stmt.close();
-                            con.close();
-
-                            panelright1.setVisible(false);
-                            panelright2.setVisible(false);
-
-                            panelright4.removeAll();
-                            panelright4.setLayout(new BorderLayout());
-                            panelright4.add(scrollPane, BorderLayout.CENTER);
-                            panelright4.revalidate();
-                            panelright4.repaint();
-                            panelright4.setVisible(true);
-                        }
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-
+            // A Button near the userID Field to search the user by ID
+            JButton searchButton = new JButton("Search");
+            searchButton.setBounds(600, 50, 100, 30);
+            searchButton.setFont(new Font("Tahoma", Font.PLAIN, 20));
+            panelright4.add(searchButton);
+            searchButton.addActionListener(e1 -> {
+                if(txtUserID.getText().equals("")) {
+                    JOptionPane.showMessageDialog(searchButton, "Please enter the user ID to search!,", "Error", JOptionPane.ERROR_MESSAGE);
+                    txtUserID.requestFocus();
                 }
+                else {
+                    // check if the user exists in the database
+                    String[] userdetails = getUserDetails(txtUserID.getText());
+                    if (userdetails[0] != null && !userdetails[0].equals("Not found")) {// Store the userdetails in variables
+                        String name = userdetails[0];
+                        // SHow a prompt to confirm the user by showing the username
+                        String message = "Are you sure you want to remove the session of the user " + name + "?";
+                        int confirm = JOptionPane.showConfirmDialog(searchButton, message , "Confirm", JOptionPane.YES_NO_OPTION);
+                        if (confirm == JOptionPane.YES_OPTION) {
+                            // Delete the user
+                            nullifySessionID(txtUserID.getText());
+                            JOptionPane.showMessageDialog(searchButton, "User " + txtUserID.getText() + "'s session removed successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                            txtUserID.setText("");
+                            txtUserID.requestFocus();
+
+                        }
+
+                    } else {
+                        JOptionPane.showMessageDialog(searchButton, "No profile with the user ID " + txtUserID.getText() + " found", "Error", JOptionPane.ERROR_MESSAGE);
+                        txtUserID.setText("");
+                    }
+                }
+
             });
 
         }
     });
+
+        // Repaint the panels to show the new components
+        panelright1.repaint();
+        panelright2.repaint();
+        panelright3.repaint();
     }
+    private void addMouseListenerToShowUserList(JLabel lblShowUsersList, JPanel panelright1, JPanel panelright2, JPanel panelright3, JPanel panelright4, JPanel panelright) {
+            lblShowUsersList.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    panelright1.setVisible(true);
+                    panelright2.setVisible(true);
+                    panelright3.setVisible(false);
+                    panelright4.setVisible(false);
+
+
+                    // Reset content of panels
+                    removeWelcomeMessage(panelright);
+                    panelright1.removeAll();
+                    panelright2.removeAll();
+                    panelright3.removeAll();
+                    panelright4.removeAll();
+
+                    // Add image to panelright1 panel
+                    try {
+                        JLabel imgStudentList = new JLabel(new ImageIcon(ImageIO.read(new File("img/Admin/studentlist.png"))));
+                        imgStudentList.setBounds(50, 10, 50, 80);
+                        panelright1.add(imgStudentList);
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+
+                    // Add content to panelright1
+                    JLabel lblShowStudentList = new JLabel("Student List");
+                    lblShowStudentList.setBounds(120, 30, 175, 30);
+                    lblShowStudentList.setFont(new Font("Tahoma", Font.BOLD, 20));
+                    panelright1.add(lblShowStudentList);
+                    lblShowStudentList.setForeground(Color.BLACK);
+
+                    // When lblShowStudentList is clicked, an object to UserTableFrame is created and is displayed
+                    lblShowStudentList.addMouseListener(new MouseAdapter() {
+                        @Override
+                        public void mouseClicked(MouseEvent e) {
+                            UserTableModel model = new UserTableModel();
+                            JTable table = new JTable(model);
+                            JScrollPane scrollPane = new JScrollPane(table);
+                            String sql = "SELECT ud.USER_ID, ud.NAME\n" +
+                                    "FROM THINKWAVE.USER_AUTHENTICATION ua\n" +
+                                    "INNER JOIN THINKWAVE.USER_DETAILS ud\n" +
+                                    "ON ua.USER_ID = ud.USER_ID\n" +
+                                    "WHERE ua.ROLE = 'Student'";
+
+                            // fetch user data from database and populate the TableModel
+                            Connection con = null;
+                            try {
+                                con = ConnectionDB.connect();
+                                Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+                                stmt.setFetchSize(1000); // set the fetch size to a non-zero value
+                                ResultSet rs = stmt.executeQuery(sql);
+
+                                // store the data in a two-dimensional array
+                                int rowCount = 0;
+                                while (rs.next()) {
+                                    rowCount++;
+                                }
+                                rs.beforeFirst();
+
+                                if (rowCount == 0) {
+                                    JOptionPane.showMessageDialog(lblShowStudentList, "There are no students registered in the system for this institution", "No Students", JOptionPane.INFORMATION_MESSAGE);
+                                    panelright1.setVisible(true);
+                                    panelright2.setVisible(true);
+                                    panelright3.setVisible(false);
+
+                                    // Reset content of panels
+                                    removeWelcomeMessage(panelright);
+                                    removeTable(panelright4);
+
+                                    panelright4.setVisible(false);
+
+                                } else {
+                                    Object[][] data = new Object[rowCount][2];
+                                    int i = 0;
+                                    while (rs.next()) {
+                                        data[i][0] = rs.getInt("USER_ID");
+                                        data[i][1] = rs.getString("NAME");
+                                        i++;
+                                    }
+
+                                    model.setData(data);
+
+                                    rs.close();
+                                    stmt.close();
+                                    con.close();
+
+                                    panelright1.setVisible(false);
+                                    panelright2.setVisible(false);
+                                    panelright3.setVisible(false);
+                                    panelright4.setVisible(true);
+
+                                    panelright4.setLayout(new BorderLayout());
+                                    panelright4.add(scrollPane, BorderLayout.CENTER);
+                                    panelright4.revalidate();
+                                    panelright4.repaint();
+
+                                }
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                                removeTable(panelright4);
+                            }
+
+                        }
+                    });
+
+
+                    // Add image to panelright2 panel
+                    try {
+                        JLabel imgFacultyList = new JLabel(new ImageIcon(ImageIO.read(new File("img/Admin/facultylist.png"))));
+                        imgFacultyList.setBounds(50, 10, 50, 80);
+                        panelright2.add(imgFacultyList);
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+
+                    // Add content to panelright2
+                    JLabel lblShowFacultyList = new JLabel("Faculty List");
+                    lblShowFacultyList.setBounds(120, 30, 175, 30);
+                    lblShowFacultyList.setFont(new Font("Tahoma", Font.BOLD, 20));
+                    panelright2.add(lblShowFacultyList);
+                    lblShowFacultyList.setForeground(Color.BLACK);
+                    lblShowFacultyList.addMouseListener(new MouseAdapter() {
+                        @Override
+                        public void mouseClicked(MouseEvent e) {
+                            UserTableModel model = new UserTableModel();
+                            JTable table = new JTable(model);
+                            JScrollPane scrollPane = new JScrollPane(table);
+                            String sql = "SELECT ud.USER_ID, ud.NAME\n" +
+                                    "FROM THINKWAVE.USER_AUTHENTICATION ua\n" +
+                                    "INNER JOIN THINKWAVE.USER_DETAILS ud\n" +
+                                    "ON ua.USER_ID = ud.USER_ID\n" +
+                                    "WHERE ua.ROLE = 'Faculty'";
+
+                            // fetch user data from database and populate the TableModel
+                            Connection con = null;
+                            try {
+                                con = ConnectionDB.connect();
+                                Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+                                stmt.setFetchSize(1000); // set the fetch size to a non-zero value
+                                ResultSet rs = stmt.executeQuery(sql);
+
+                                // store the data in a two-dimensional array
+                                int rowCount = 0;
+                                while (rs.next()) {
+                                    rowCount++;
+                                }
+                                rs.beforeFirst();
+
+                                if (rowCount == 0) {
+                                    JOptionPane.showMessageDialog(lblShowStudentList, "There are no faculty registered in the system for this institution", "No Students", JOptionPane.INFORMATION_MESSAGE);
+
+                                    panelright1.setVisible(true);
+                                    panelright2.setVisible(true);
+                                    panelright3.setVisible(false);
+                                    panelright4.setVisible(false);
+
+                                    // Reset content of panels
+                                    removeWelcomeMessage(panelright);
+                                    removeTable(panelright4);
+                                } else {
+                                    Object[][] data = new Object[rowCount][2];
+                                    int i = 0;
+                                    while (rs.next()) {
+                                        data[i][0] = rs.getInt("USER_ID");
+                                        data[i][1] = rs.getString("NAME");
+                                        i++;
+                                    }
+
+                                    model.setData(data);
+
+                                    rs.close();
+                                    stmt.close();
+                                    con.close();
+
+                                    panelright1.setVisible(false);
+                                    panelright2.setVisible(false);
+
+                                    panelright4.setLayout(new BorderLayout());
+                                    panelright4.add(scrollPane, BorderLayout.CENTER);
+                                    panelright4.setVisible(true);
+
+                                }
+                            } catch (Exception ex) {
+                                removeTable(panelright4);
+                                ex.printStackTrace();
+                            }
+
+                        }
+                    });
+
+                }
+            });
+        }
 
 }
