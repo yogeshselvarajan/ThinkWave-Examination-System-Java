@@ -106,7 +106,6 @@ public class AdminDashboard  extends JFrame
                 
 
                 // Reset content of panels
-                removeWelcomeMessage(panelright);
                 removeTable(panelright4);
                 panelright1.removeAll();
                 panelright2.removeAll();
@@ -119,6 +118,15 @@ public class AdminDashboard  extends JFrame
                 panelright4.setBackground(Color.YELLOW);
                 panelright4.setBorder(new LineBorder(Color.BLACK, 2));
                 panelright4.setLayout(null);
+
+                // Add the text for the top of the panelright1, panelright2 and panelright3 panels
+                try{
+                    JLabel imgAddBanner= new JLabel(new ImageIcon(ImageIO.read(new File("img/Admin/manage-users-details.png"))));
+                    imgAddBanner.setBounds(215, 5, 500, 100);
+                    panelright.add(imgAddBanner);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
 
 
                 // Add image to panelright1 panel
@@ -148,6 +156,14 @@ public class AdminDashboard  extends JFrame
                         removeTable(panelright4);
 
                         panelright4.setVisible(true);
+
+                        try{
+                            JLabel imgAddBanner= new JLabel(new ImageIcon(ImageIO.read(new File("img/Admin/add-user-details.png"))));
+                            imgAddBanner.setBounds(215, 5, 500, 100);
+                            panelright.add(imgAddBanner);
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
 
 
                         // Add a label to the panelright4 panel with the text "User ID"
@@ -434,6 +450,14 @@ public class AdminDashboard  extends JFrame
                         panelright4.setBorder(new LineBorder(Color.BLACK, 2));
                         panelright4.setLayout(null);
 
+                        try{
+                            JLabel imgAddBanner= new JLabel(new ImageIcon(ImageIO.read(new File("img/Admin/edit-user-details.png"))));
+                            imgAddBanner.setBounds(215, 5, 500, 100);
+                            panelright.add(imgAddBanner);
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+
 
                         // Add a label to the panelright4 panel with the text "User ID"
                         JLabel lblUserID = new JLabel("User ID:");
@@ -660,6 +684,14 @@ public class AdminDashboard  extends JFrame
                         panelright4.setBorder(new LineBorder(Color.BLACK, 2));
                         panelright4.setLayout(null);
 
+                        try{
+                            JLabel imgAddBanner= new JLabel(new ImageIcon(ImageIO.read(new File("img/Admin/delete-user-details.png"))));
+                            imgAddBanner.setBounds(215, 5, 500, 100);
+                            panelright.add(imgAddBanner);
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+
                         // Add a label with the text User ID: to the panelright3 panel
                         JLabel lblUserID = new JLabel("User ID:");
                         lblUserID.setFont(new Font("Tahoma", Font.BOLD, 20));
@@ -791,6 +823,17 @@ public class AdminDashboard  extends JFrame
                 panelright4.repaint();
                 panelright4.setVisible(true);
 
+                // Add image to panelright1 panel
+                try {
+                    JLabel imgStudentList = new JLabel(new ImageIcon(ImageIO.read(new File("img/Admin/add-question-paper.png"))));
+                    imgStudentList.setBounds(50, 10, 50, 80);
+                    panelright1.add(imgStudentList);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+
+
+
                 // Add a label with the text CourseCode: to the panelright4 panel
                 JLabel lblCourseCode = new JLabel("Course Code:");
                 lblCourseCode.setFont(new Font("Tahoma", Font.BOLD, 20));
@@ -912,11 +955,11 @@ public class AdminDashboard  extends JFrame
                         String examDate = datePicker.getJFormattedTextField().getText();
                         String fileName = txtFileName.getText();
 
-                        String dbUrl = "jdbc:sqlserver://thinkwaveappln.database.windows.net:1433;database=orcl;user=thinkwave@thinkwaveappln;password=Mepcocollege1@;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;";
                         String sql = "INSERT INTO THINKWAVE.QB_Question (InstID, CourseID, Semester, Year, ExamTitle, ExamDate, FileName, QuestionPaperPDF) VALUES (?, ?, ?, ?, ?, CONVERT(VARCHAR, ?, 3), ?, ?)";
 
-                        try (Connection conn = DriverManager.getConnection(dbUrl);
-                             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                        try
+                        {    Connection conn = ConnectionDB.connect();
+                             PreparedStatement pstmt = conn.prepareStatement(sql);
                             pstmt.setString(1, insID);
                             pstmt.setInt(2, courseID);
                             pstmt.setInt(3, semester);
@@ -1037,6 +1080,7 @@ public class AdminDashboard  extends JFrame
                     userDetails[1] = rs.getString("MOBILENUM");
                     userDetails[2] = rs.getString("EMAIL");
                     userDetails[3] = rs.getString("ADDRESS");
+                    userDetails[4] = rs.getString("INSTID");
                 }
             }
         } catch (SQLException ex) {
@@ -1077,6 +1121,15 @@ public class AdminDashboard  extends JFrame
                 panelright4.revalidate();
                 panelright4.repaint();
                 panelright4.setVisible(true);
+
+                // Add image to panelright1 panel
+                try {
+                    JLabel imgStudentList = new JLabel(new ImageIcon(ImageIO.read(new File("img/Admin/change-password.png"))));
+                    imgStudentList.setBounds(50, 10, 50, 80);
+                    panelright1.add(imgStudentList);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
 
                 JLabel userIDLabel = new JLabel("User ID:");
                 userIDLabel.setFont(new Font("Tahoma", Font.BOLD, 20));
@@ -1488,7 +1541,7 @@ public class AdminDashboard  extends JFrame
 
         // A panel inside the panelright panel to display the content
         JPanel panelright1 = new JPanel();
-        panelright1.setBounds(65, 55, 300, 100);
+        panelright1.setBounds(65, 95, 300, 100);
         // Set colour to panel background to  yellow
         panelright1.setBackground(Color.YELLOW);
         panelright1.setBorder(new LineBorder(Color.BLACK, 2));
@@ -1498,7 +1551,7 @@ public class AdminDashboard  extends JFrame
 
         // A panel inside the panelright panel on the right side to panelright1 panel to display the content
         JPanel panelright2 = new JPanel();
-        panelright2.setBounds(425, 55, 300, 100);
+        panelright2.setBounds(425, 95, 300, 100);
         // Set colour to panel background to  yellow
         panelright2.setBackground(Color.YELLOW);
         panelright2.setBorder(new LineBorder(Color.BLACK, 2));
@@ -1508,7 +1561,7 @@ public class AdminDashboard  extends JFrame
 
         // A panel inside the panelright panel on the right side to panelright2 panel to display the content
         JPanel panelright3 = new JPanel();
-        panelright3.setBounds(790, 55, 300, 100);
+        panelright3.setBounds(790, 95, 300, 100);
         // Set colour to panel background to  yellow
         panelright3.setBackground(Color.YELLOW);
         panelright3.setBorder(new LineBorder(Color.BLACK, 2));
@@ -1564,6 +1617,17 @@ public class AdminDashboard  extends JFrame
             panelright4.setBorder(new LineBorder(Color.BLACK, 2));
             panelright4.setLayout(null);
             panelright4.setVisible(true);
+
+            // Add image to panelright1 panel
+            try {
+                JLabel imgStudentList = new JLabel(new ImageIcon(ImageIO.read(new File("img/Admin/force-logout.png"))));
+                imgStudentList.setBounds(50, 10, 50, 80);
+                panelright1.add(imgStudentList);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+
+
 
             // Add a label with the text User ID: to the panelright3 panel
             JLabel lblUserID = new JLabel("User ID:");
@@ -1652,7 +1716,6 @@ public class AdminDashboard  extends JFrame
 
 
                     // Reset content of panels
-                    removeWelcomeMessage(panelright);
                     panelright1.removeAll();
                     panelright2.removeAll();
                     panelright3.removeAll();
@@ -1681,70 +1744,86 @@ public class AdminDashboard  extends JFrame
                             UserTableModel model = new UserTableModel();
                             JTable table = new JTable(model);
                             JScrollPane scrollPane = new JScrollPane(table);
-                            String sql = "SELECT ud.USER_ID, ud.NAME\n" +
-                                    "FROM THINKWAVE.USER_AUTHENTICATION ua\n" +
-                                    "INNER JOIN THINKWAVE.USER_DETAILS ud\n" +
-                                    "ON ua.USER_ID = ud.USER_ID\n" +
-                                    "WHERE ua.ROLE = 'Student'";
+                            String[] userdetails = getUserDetails(gotUserID);
+                            if (userdetails[0] != null && !userdetails[0].equals("Not found")) {
+                                String adminINSTID = userdetails[4];
 
-                            // fetch user data from database and populate the TableModel
-                            Connection con = null;
-                            try {
-                                con = ConnectionDB.connect();
-                                Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-                                stmt.setFetchSize(1000); // set the fetch size to a non-zero value
-                                ResultSet rs = stmt.executeQuery(sql);
 
-                                // store the data in a two-dimensional array
-                                int rowCount = 0;
-                                while (rs.next()) {
-                                    rowCount++;
-                                }
-                                rs.beforeFirst();
+                                String sql = "SELECT ud.USER_ID, ud.NAME\n" +
+                                        "FROM THINKWAVE.USER_AUTHENTICATION ua\n" +
+                                        "INNER JOIN THINKWAVE.USER_DETAILS ud\n" +
+                                        "ON ua.USER_ID = ud.USER_ID\n" +
+                                        "WHERE ua.ROLE = 'Student'  AND ud.INSTID = '" + adminINSTID + "'";
 
-                                if (rowCount == 0) {
-                                    JOptionPane.showMessageDialog(lblShowStudentList, "There are no students registered in the system for this institution", "No Students", JOptionPane.INFORMATION_MESSAGE);
-                                    panelright1.setVisible(true);
-                                    panelright2.setVisible(true);
-                                    panelright3.setVisible(false);
+                                // fetch user data from database and populate the TableModel
+                                Connection con = null;
+                                try {
+                                    con = ConnectionDB.connect();
+                                    Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+                                    stmt.setFetchSize(1000); // set the fetch size to a non-zero value
+                                    ResultSet rs = stmt.executeQuery(sql);
 
-                                    // Reset content of panels
-                                    removeWelcomeMessage(panelright);
-                                    removeTable(panelright4);
-
-                                    panelright4.setVisible(false);
-
-                                } else {
-                                    Object[][] data = new Object[rowCount][2];
-                                    int i = 0;
+                                    // store the data in a two-dimensional array
+                                    int rowCount = 0;
                                     while (rs.next()) {
-                                        data[i][0] = rs.getInt("USER_ID");
-                                        data[i][1] = rs.getString("NAME");
-                                        i++;
+                                        rowCount++;
                                     }
+                                    rs.beforeFirst();
 
-                                    model.setData(data);
+                                    if (rowCount == 0) {
+                                        JOptionPane.showMessageDialog(lblShowStudentList, "There are no students registered in the system for this institution", "No Students", JOptionPane.INFORMATION_MESSAGE);
+                                        panelright1.setVisible(true);
+                                        panelright2.setVisible(true);
+                                        panelright3.setVisible(false);
 
-                                    rs.close();
-                                    stmt.close();
-                                    con.close();
+                                        // Reset content of panels
+                                        removeWelcomeMessage(panelright);
+                                        removeTable(panelright4);
 
-                                    panelright1.setVisible(false);
-                                    panelright2.setVisible(false);
-                                    panelright3.setVisible(false);
-                                    panelright4.setVisible(true);
+                                        panelright4.setVisible(false);
 
-                                    panelright4.setLayout(new BorderLayout());
-                                    panelright4.add(scrollPane, BorderLayout.CENTER);
-                                    panelright4.revalidate();
-                                    panelright4.repaint();
+                                    } else {
+                                        Object[][] data = new Object[rowCount][2];
+                                        int i = 0;
+                                        while (rs.next()) {
+                                            data[i][0] = rs.getInt("USER_ID");
+                                            data[i][1] = rs.getString("NAME");
+                                            i++;
+                                        }
 
+                                        model.setData(data);
+
+                                        rs.close();
+                                        stmt.close();
+                                        con.close();
+
+                                        panelright1.setVisible(false);
+                                        panelright2.setVisible(false);
+                                        panelright3.setVisible(false);
+                                        panelright4.setVisible(true);
+
+                                        panelright4.setLayout(new BorderLayout());
+                                        panelright4.add(scrollPane, BorderLayout.CENTER);
+                                        panelright4.revalidate();
+                                        panelright4.repaint();
+
+                                    }
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                    removeTable(panelright4);
                                 }
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
-                                removeTable(panelright4);
-                            }
+                            } else {
+                                JOptionPane.showMessageDialog(lblShowStudentList, "There are no students registered in the system for this institution", "No Students", JOptionPane.INFORMATION_MESSAGE);
+                                panelright1.setVisible(true);
+                                panelright2.setVisible(true);
+                                panelright3.setVisible(false);
 
+                                // Reset content of panels
+                                removeWelcomeMessage(panelright);
+                                removeTable(panelright4);
+
+                                panelright4.setVisible(false);
+                            }
                         }
                     });
 
@@ -1770,64 +1849,80 @@ public class AdminDashboard  extends JFrame
                             UserTableModel model = new UserTableModel();
                             JTable table = new JTable(model);
                             JScrollPane scrollPane = new JScrollPane(table);
-                            String sql = "SELECT ud.USER_ID, ud.NAME\n" +
-                                    "FROM THINKWAVE.USER_AUTHENTICATION ua\n" +
-                                    "INNER JOIN THINKWAVE.USER_DETAILS ud\n" +
-                                    "ON ua.USER_ID = ud.USER_ID\n" +
-                                    "WHERE ua.ROLE = 'Faculty'";
+                            String[] userdetails = getUserDetails(gotUserID);
+                            if (userdetails[0] != null && !userdetails[0].equals("Not found")) {
+                                String adminINSTID = userdetails[4];
 
-                            // fetch user data from database and populate the TableModel
-                            Connection con = null;
-                            try {
-                                con = ConnectionDB.connect();
-                                Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-                                stmt.setFetchSize(1000); // set the fetch size to a non-zero value
-                                ResultSet rs = stmt.executeQuery(sql);
 
-                                // store the data in a two-dimensional array
-                                int rowCount = 0;
-                                while (rs.next()) {
-                                    rowCount++;
-                                }
-                                rs.beforeFirst();
+                                String sql = "SELECT ud.USER_ID, ud.NAME\n" +
+                                        "FROM THINKWAVE.USER_AUTHENTICATION ua\n" +
+                                        "INNER JOIN THINKWAVE.USER_DETAILS ud\n" +
+                                        "ON ua.USER_ID = ud.USER_ID\n" +
+                                        "WHERE ua.ROLE = 'Faculty'  AND ud.INSTID = '" + adminINSTID + "'";
 
-                                if (rowCount == 0) {
-                                    JOptionPane.showMessageDialog(lblShowStudentList, "There are no faculty registered in the system for this institution", "No Students", JOptionPane.INFORMATION_MESSAGE);
+                                // fetch user data from database and populate the TableModel
+                                Connection con = null;
+                                try {
+                                    con = ConnectionDB.connect();
+                                    Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+                                    stmt.setFetchSize(1000); // set the fetch size to a non-zero value
+                                    ResultSet rs = stmt.executeQuery(sql);
 
-                                    panelright1.setVisible(true);
-                                    panelright2.setVisible(true);
-                                    panelright3.setVisible(false);
-                                    panelright4.setVisible(false);
-
-                                    // Reset content of panels
-                                    removeWelcomeMessage(panelright);
-                                    removeTable(panelright4);
-                                } else {
-                                    Object[][] data = new Object[rowCount][2];
-                                    int i = 0;
+                                    // store the data in a two-dimensional array
+                                    int rowCount = 0;
                                     while (rs.next()) {
-                                        data[i][0] = rs.getInt("USER_ID");
-                                        data[i][1] = rs.getString("NAME");
-                                        i++;
+                                        rowCount++;
                                     }
+                                    rs.beforeFirst();
 
-                                    model.setData(data);
+                                    if (rowCount == 0) {
+                                        JOptionPane.showMessageDialog(lblShowStudentList, "There are no faculty registered in the system for this institution", "No Students", JOptionPane.INFORMATION_MESSAGE);
 
-                                    rs.close();
-                                    stmt.close();
-                                    con.close();
+                                        panelright1.setVisible(true);
+                                        panelright2.setVisible(true);
+                                        panelright3.setVisible(false);
+                                        panelright4.setVisible(false);
 
-                                    panelright1.setVisible(false);
-                                    panelright2.setVisible(false);
+                                        // Reset content of panels
+                                        removeWelcomeMessage(panelright);
+                                        removeTable(panelright4);
+                                    } else {
+                                        Object[][] data = new Object[rowCount][2];
+                                        int i = 0;
+                                        while (rs.next()) {
+                                            data[i][0] = rs.getInt("USER_ID");
+                                            data[i][1] = rs.getString("NAME");
+                                            i++;
+                                        }
 
-                                    panelright4.setLayout(new BorderLayout());
-                                    panelright4.add(scrollPane, BorderLayout.CENTER);
-                                    panelright4.setVisible(true);
+                                        model.setData(data);
 
+                                        rs.close();
+                                        stmt.close();
+                                        con.close();
+
+                                        panelright1.setVisible(false);
+                                        panelright2.setVisible(false);
+
+                                        panelright4.setLayout(new BorderLayout());
+                                        panelright4.add(scrollPane, BorderLayout.CENTER);
+                                        panelright4.setVisible(true);
+
+                                    }
+                                } catch (Exception ex) {
+                                    removeTable(panelright4);
+                                    ex.printStackTrace();
                                 }
-                            } catch (Exception ex) {
+                            } else {
+                                JOptionPane.showMessageDialog(lblShowStudentList, "There are no faculty registered in the system for this institution", "No Students", JOptionPane.INFORMATION_MESSAGE);
+                                panelright1.setVisible(true);
+                                panelright2.setVisible(true);
+                                panelright3.setVisible(false);
+                                panelright4.setVisible(false);
+
+                                // Reset content of panels
+                                removeWelcomeMessage(panelright);
                                 removeTable(panelright4);
-                                ex.printStackTrace();
                             }
 
                         }

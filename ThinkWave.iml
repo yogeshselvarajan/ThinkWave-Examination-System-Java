@@ -53,5 +53,20 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/JAR files/jfreechart-1.0.19" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/JAR files/jfreechart-1.0.19/experimental" />
+          <root url="file://$MODULE_DIR$/JAR files/jfreechart-1.0.19/source" />
+          <root url="file://$MODULE_DIR$/JAR files/jfreechart-1.0.19/swt" />
+          <root url="file://$MODULE_DIR$/JAR files/jfreechart-1.0.19/tests" />
+        </SOURCES>
+        <jarDirectory url="file://$MODULE_DIR$/JAR files/jfreechart-1.0.19" recursive="false" />
+      </library>
+    </orderEntry>
   </component>
 </module>
