@@ -66,3 +66,16 @@ CREATE TRIGGER set_role
                  JOIN inserted i ON ua.USER_ID = i.USER_ID;
     END;
 
+    create table THINKWAVE.EXAM_DETAILS
+    (
+        exam_id      int           not null
+            primary key,
+        faculty_id   int           not null
+            references THINKWAVE.USER_DETAILS,
+        exam_name    varchar(255)  not null,
+        exam_date    varchar(max)  not null,
+        duration     int           not null,
+        total_marks  int           not null,
+        is_published bit default 0 not null
+    );
+

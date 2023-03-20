@@ -24,7 +24,7 @@ public class NewUserAddedNotifier
                 "\t\t User ID: "+ loginInfo[0]+ "\n" +
                 "\t\t Password: "+ password + "\n" +
                 "\n" +
-                "We kindly request that you log in with this credentials and change the password immediately after your first login to ensure the safety of your account.\n" +
+                "Please log in to the ThinkWave Examination System with the above credentials. After logging in for the first time, we recommend that you change your password immediately to ensure the safety of your account. Please choose a unique, strong password and do not share it with anyone else.\n" +
                 "\n" +
                 "If you encounter any difficulty logging in or require any assistance with the system, please do not hesitate to contact us immediately at alerts.thinkwave.app@gmail.com.\n" +
                 "\n" +
@@ -39,6 +39,7 @@ public class NewUserAddedNotifier
                 "\n" +
                 "\n" +
                 "\n";
+
 
 
         MailSender obj = new MailSender();

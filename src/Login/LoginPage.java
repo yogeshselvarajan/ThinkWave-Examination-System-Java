@@ -7,6 +7,7 @@ import DatabaseFunctions.RetriveRole;
 import DatabaseFunctions.UpdateLoginActivity;
 import DatabaseFunctions.UserLoginCheck;
 import DateTime.DateTimePanel;
+import Faculty.FacultyDashboard;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -465,6 +466,11 @@ public class LoginPage extends JFrame {
                             AdminDashboard.getUserIDFromLogin(userID);
                             AdminDashboard.main(null);
                         } else if (role.equals("Faculty")) {
+                            FacultyDashboard.getUserIDFromLogin(userID);
+                            FacultyDashboard.main(null);
+                        } else if (role.equals("Student")) {
+                            /*StudentDashboard.getUserIDFromLogin(userID);
+                            StudentDashboard.main(null);*/
 
                         } else
                         {

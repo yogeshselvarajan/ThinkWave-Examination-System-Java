@@ -23,21 +23,23 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.awt.List;
 import java.awt.event.*;
 import java.awt.font.TextAttribute;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.sql.*;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Properties;
+import java.util.*;
 
 import static DatabaseFunctions.UpdatePassword.updatePassword;
 import static Mail.NewUserAddedNotifier.sendnotification;
 import static Mail.PasswordChangeNotifier.sendPasswordChangeNotification;
 import static RegexChecks.CheckEmail.isValidEmail;
+
+
 
 public class AdminDashboard  extends JFrame {
     File selectedFile;
@@ -54,6 +56,18 @@ public class AdminDashboard  extends JFrame {
     }
 
     private int numStudents, numFaculties, numAdmins;
+
+    private static final String LOWER = "abcdefghijklmnopqrstuvwxyz";
+    private static final String UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final String NUMBERS = "0123456789";
+    private static final String SPECIAL = "!@#$%^&*_=+-/";
+
+    private static final String ALL_CHARS = LOWER + UPPER + NUMBERS + SPECIAL;
+
+    private static final int PASSWORD_LENGTH = 12;
+
+    private static SecureRandom random = new SecureRandom();
+
 
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
@@ -82,6 +96,21 @@ public class AdminDashboard  extends JFrame {
                 }
             }
         }
+    }
+
+
+    public static String generateSecureRandomPassword(int length) {
+        String passwordChars = "abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+        SecureRandom random = new SecureRandom();
+        StringBuilder sb = new StringBuilder(length);
+
+        for (int i = 0; i < length; i++) {
+            int randomIndex = random.nextInt(passwordChars.length());
+            char randomChar = passwordChars.charAt(randomIndex);
+            sb.append(randomChar);
+        }
+
+        return sb.toString();
     }
 
 
@@ -361,7 +390,7 @@ public class AdminDashboard  extends JFrame {
                                 String queryforDetails = "INSERT INTO THINKWAVE.USER_DETAILS (USER_ID, INSTID, NAME, MOBILENUM, EMAIL, ADDRESS, GENDER) VALUES (?, ?, ?, ?, ?, ?, ?)";
                                 String queryforAuth = "INSERT INTO THINKWAVE.USER_AUTHENTICATION (USER_ID, LAST_LOGIN, PASSW_HASH, PASSW_SALT, INST_ID) VALUES (?, ?, ?, ?, ?)";
                                 String Salt = PassBasedEnc.getSaltvalue(30);
-                                String password = email.split("@")[0];
+                                String password = generateSecureRandomPassword(10);
                                 String hash = PassBasedEnc.generateSecurePassword(password, Salt);
 
                                 try (connection;
@@ -374,7 +403,7 @@ public class AdminDashboard  extends JFrame {
                                     preparedStatement.setString(6, address);
                                     preparedStatement.setString(7, gender);
                                     preparedStatement.executeUpdate();
-                                    JOptionPane.showMessageDialog(btnSubmit, "User added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+
                                     txtUserID.setText("");
                                     txtInstitutionID.setText("");
                                     txtName.setText("");
@@ -394,7 +423,7 @@ public class AdminDashboard  extends JFrame {
                                         preparedStatement2.executeUpdate();
                                         connection.setAutoCommit(false);
                                         connection.commit(); // commit the transaction
-
+                                        JOptionPane.showMessageDialog(btnSubmit, "User added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
 
                                     } catch (SQLException ignored) {
                                     } catch (IOException ex) {
@@ -791,8 +820,8 @@ public class AdminDashboard  extends JFrame {
 
             public boolean deleteUserData(int userId) throws SQLException {
                 Connection connection = ConnectionDB.connect();
-                PreparedStatement deleteAuth = connection.prepareStatement("DELETE FROM USER_AUTHENTICATION WHERE USER_ID = ?");
-                PreparedStatement deleteDetails = connection.prepareStatement("DELETE FROM USER_DETAILS WHERE USER_ID = ?");
+                PreparedStatement deleteAuth = connection.prepareStatement("DELETE FROM THINKWAVE.USER_AUTHENTICATION WHERE USER_ID = ?");
+                PreparedStatement deleteDetails = connection.prepareStatement("DELETE FROM THINKWAVE.USER_DETAILS WHERE USER_ID = ?");
 
                 connection.setAutoCommit(false); // Start a transaction
                 try {
@@ -1246,7 +1275,15 @@ public class AdminDashboard  extends JFrame {
                         passwordField.setText("");
                         confirmPasswordField.setText("");
                         passwordField.requestFocus();
-                    } else {
+                    }
+                    else if(!confirmPasswordField.getText().matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$"))
+                        {
+                            JOptionPane.showMessageDialog(changePasswordButton, "Password must contain atleast 8 characters, 1 uppercase, 1 lowercase, 1 special character and 1 number!", "Error", JOptionPane.ERROR_MESSAGE);
+                            passwordField.setText("");
+                            confirmPasswordField.setText("");
+                            passwordField.requestFocus();
+                        }
+                    else {
                         String password = new String(passwordField.getPassword());
                         String email = RetrieveEmailID.retrieveEmail(Integer.parseInt(userIDField.getText()));
                         if (!updatePassword(Integer.parseInt(userIDField.getText()), password)) {
@@ -1296,10 +1333,7 @@ public class AdminDashboard  extends JFrame {
         image2.setBounds(155, 185, 1200, 50);
         contentPane.add(image2);
 
-           /* JLabel image3 = new JLabel(new ImageIcon(ImageIO.read(new File("./img/Admin/admin ui.jpg"))));
-            image3.setBounds(15, 235, 600, 500);
-            contentPane.add(image3);
-*/
+
         // A panel at the top of the frame
         JPanel paneltop = new JPanel();
         paneltop.setBounds(0, 0, 1400, 195);

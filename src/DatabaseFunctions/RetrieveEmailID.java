@@ -28,6 +28,6 @@ public class RetrieveEmailID {
     }
 
     public static void main(String[] args) {
-        System.out.println(retrieveEmail(10001));
+        System.out.println(retrieveEmail(1));
     }
 }
